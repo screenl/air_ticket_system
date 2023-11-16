@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="/static/scripts/sorttable.js"></script>
+    <style>
+      /* Style the body */
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 0;
+      }
+
+      /* Header/logo Title */
+      .header {
+        transition: margin-left .3s;
+        margin-left: 250px;
+        padding: 10px;
+        text-align: center;
+        background-color: #610C9F; /* Black */
+        color: white;
+      }
+
+      /* Increase the font size of the heading */
+      .header h1 {
+        font-size: 40px;
+      }
+
+      /* Style the side navigation bar */
+      .sidenav {
+        height: 100%; /* Full-height: remove this if you want "auto" height */
+        width: 250px; /* Set the width of the sidebar */
+        position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+        z-index: 1; /* Stay on top */
+        top: 0; /* Stay at the top */
+        left: 0;
+        background: #940B92;
+        overflow-x: hidden; /* Disable horizontal scroll */
+        padding-top: 20px;
+        transition: 0.3s;
+      }
+
+      /* The navigation menu links */
+      .sidenav a {
+        padding: 6px 8px 6px 16px;
+        text-decoration: none;
+        font-size: 25px;
+        color: #818181;
+        display: block;
+      }
+
+      #toggle {
+      position: absolute;
+      bottom: 0;
+      margin-bottom: 25px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+
+      border: none;
+      order: none;
+     }
+     #toggle button {
+        background-color: #940B92;
+        border: none;
+        color: white;
+        font-size: large;
+        font-weight: bolder;
+
+     }
+
+      /* When you mouse over the navigation links, change their color */
+      .sidenav a:hover {
+        color: #f1f1f1;
+      }
+
+      /* Style the main content */
+      .main {
+        transition: margin-left .3s;
+        margin-left: 250px; /* Same as the width of the sidebar */
+        padding: 0px 0px;
+      }
+
+      .main_content {
+        padding: 10px 50px;
+      }
+
+      /* Add a black background color to the top navigation */
+      .topnav {
+        background-color: #ddd;
+        overflow: hidden;
+      }
+
+      /* Style the topnav links */
+      .topnav a {
+        float: right;
+        display: block;
+        color: black;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+      }
+
+      /* Change color on hover */
+      .topnav a:hover {
+        background-color: #ddd;
+        color: #f2f2f2;
+      }
+
+      /* Style the user profile */
+      .profile {
+        display: flex;
+        align-items: center;
+        margin: 10px;
+      }
+
+      /* Style the user image */
+      .profile img {
+        border-radius: 50%;
+        width: 70px;
+        height: 70px;
+      }
+
+      /* Style the user name */
+      .profile h3 {
+        margin-left: 20px;
+        color: white;
+
+        transition: 0.3s;
+      }
+
+      /* Style the collapsible button that is used to open and close the sidenav */
+      .collapsible {
+        background-color: #940B92;
+        color: white;
+        cursor: pointer;
+        padding: 18px;
+        width: 100%;
+        border: none;
+        text-align: left;
+        outline: none;
+        font-size: 15px;
+      }
+
+      /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+      .active,
+      .collapsible:hover {
+        background-color: #914890;
+      }
+
+      /* Style the collapsible content. Note: hidden by default */
+      .content {
+        display: none;
+        padding: 0 18px;
+        background-color: #f1f1f1;
+        overflow: hidden;
+      }
+
+      #query_form {
+            margin: 20px auto;
+            width: 600px;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+      #query_form label {
+          display: inline-block;
+          width: 100px;
+      }
+
+      #query_form input {
+          margin: 5px;
+      }
+
+      #query_form select {
+          margin: 5px;
+      }
+
+      #query_form button {
+          margin-left: 100px;
+      }
+
+      #result {
+        font-size: 25px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id="sidebar" class="sidenav">
+      <div class="profile">
+        {%if login%}
+          {%if 'profile' in login%}
+          <img src="{{login['profile']}}" alt="User" />
+          {%endif%}
+        {%else%}
+        <img src="/static/images/visitor_profile.png" alt="User" />
+        {%endif%}
+        {%if login%}
+        <div id="uname"> <h3>{{login['username']}}</h3> </div>
+        {%else%}
+        <div id="uname"> <h3>Visitor</h3> </div>
+        {%endif%}
+      </div>
+      <div id="menu">
+        {%if login%}
+        <button class="collapsible" onclick="window.location.href='/account'">My Account</button>
+        <button class="collapsible" onclick="window.location.href='/account/logout'">Log Out</button>
+        {%else%}
+        <button class="collapsible" onclick="window.location.href='/account/login'">Log In</button>
+        <button class="collapsible" onclick="window.location.href='/account/register'">Sign Up</button>
+        {%endif%}
+        <button class="collapsible" onclick="window.location.href='/public/search_flight'">View Public Info</button>
+        <button class="collapsible" onclick="window.location.href='/public/home'" >About</button>
+      </div>
+      <div id="toggle">
+        <button id="tbutton" onclick="toggleSidebar()"> << </button>
+      </div>
+    </div>
+
+    <div id ="header" class="header">
+        <h1>View Flight Status</h1>
+      </div>
+
+    <div id="main" class="main">
+      <div class="topnav">
+        <a href="/public/status">View Flight Status</a> 
+        <a href="/public/search_flight">Search for Flights</a>
+      </div>
+      <div class="main_content">
+        <form id="query_form" action="">
+          <div>
+          <label for="airline_name">Airline: </label> 
+          <select id="airline_name" name="airline_name">
+              <option value=""></option>
+              {% for a in airlines %}
+              <option value="{{a}}">{{a}}</option>
+              {% endfor %}
+          </select>
+          </div>
+  
+          <div>
+          <label for="flight_num">Flight Number</label>  
+          <input type="number" id="flight_num" name="flight_num">
+          </div>
+
+          <div>
+          <label for="DATE(departure_time)">Departing</label>
+          <input type="date" id="DATE(departure_time)" name="DATE(departure_time)">
+          </div>
+  
+          <div>
+          <label for="DATE(arrival_time)">Arriving</label>
+          <input type="date" id="DATE(arrival_time)" name="DATE(arrival_time)"><br>
+          </div>
+  
+          
+          <div>
+          <input type="submit" value="Search">
+          </div>
+        </form> 
+        {% if result %}
+         <p id = "result">Flight <b>{{result['airline_name']}} {{result['flight_num']}}</b> from <b>{{result['departure_airport']}}</b> to <b>{{result['arrival_airport']}}</b> is currently <b>{{result['status']}}</b> </p>
+        {% else %}
+          <p id = "result">Please enter a valid input.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <script>
+      /*// Get all the collapsible elements
+      var coll = document.getElementsByClassName("collapsible");
+
+      // Loop through the elements and add a click event listener
+      for (var i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function () {
+          // Toggle the "active" class
+          this.classList.toggle("active");
+
+          // Get the content element
+          var content = this.nextElementSibling;
+
+          // Toggle the visibility of the content
+          if (content.style.display === "block") {
+            content.style.display = "none";
+          } else {
+            content.style.display = "block";
+          }
+        });
+      }*/
+
+      function toggleSidebar() {
+        var sidebar = document.getElementById("sidebar");
+        var menu = document.getElementById("menu");
+        var header = document.getElementById("header");
+        var main = document.getElementById("main");
+        var uname = document.getElementById("uname");
+        var tb = document.getElementById("tbutton");
+        if (menu.style.display == "none") {
+            menu.style.display = "block";
+            uname.style.display = "block";
+            sidebar.style.width = "250px";
+            header.style.marginLeft = "250px";
+            main.style.marginLeft = "250px";
+            tb.innerHTML="<<";
+
+        } else {
+            menu.style.display = "none";
+            uname.style.display = "none";
+            sidebar.style.width = "90px";
+            header.style.marginLeft = "90px";
+            main.style.marginLeft = "90px";
+            tb.innerHTML=">>";
+        }
+    }
+    </script>
+  </body>
+</html>

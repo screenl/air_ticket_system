@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            background-color: #610C9F;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 40px;
+        }
+        .tab {
+            display: inline-block;
+            margin-bottom: 0px;
+            padding: 10px;
+            border: 1px solid black;
+            cursor: pointer;
+            background-color: white;
+        }
+
+        .tab.active {
+            background-color: rgb(194, 173, 230);
+        }
+
+        .form {
+            display: none;
+            margin: auto;
+            padding: 10px;
+            width: 800px;
+            border: 1px solid black;
+            background-color: white;
+        }
+
+        .form.active {
+            display: block;
+        }
+
+
+
+
+        .form p{
+            text-align: left;
+        }
+
+        .form label{
+            text-align: left;
+            margin-left: 15%;
+            font-size: 15px;
+        }
+
+        .form input{
+            text-align: left;
+            width:70%;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            margin-left: 15%;
+        }
+
+        .form input[type=submit]{
+            background-color: #610C9F;
+            border: none;
+            color: white;
+            width: auto;
+            padding: 16px;
+            margin-right: auto;
+            cursor: pointer;
+        }
+
+        .sb{
+            width: 100%;
+            text-align: center;
+        }
+
+        /* added styles to attach the tabs to the top border of the form and align them to the right */
+        #tabs {
+            display: flex;
+            justify-content: flex-start;
+            margin: auto;
+            width: 822px;
+        }
+
+        #forms {
+            position: relative;
+            top: -1px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sign Up</h1>
+    <div id="tabs">
+        <div class="tab" data-target="customer">Customer</div>
+        <div class="tab" data-target="agent">Agent</div>
+        <div class="tab" data-target="staff">Staff</div>
+    </div>
+    <div id="forms">
+        <div class="form" id="customer">
+            <form action="/account/register_customer" method="post">
+                <p><label for="name">Name:</label> <input type="text" name="name" id="name"></p>
+                <p><label for="email">Email:</label><input type="email" name="email" id="email"></p>
+                <p><label for="password">Password:</label><input type="password" name="password" id="password"></p>
+                <p><label for="building_number">Building Number:</label><input type="number" name="building_number" id="building_number"></p>
+                <p><label for="street">Street:</label><input type="text" name="street" id="street"></p>
+                <p><label for="city">City:</label><input type="text" name="city" id="city"></p>
+                <p><label for="state">State:</label><input type="text" name="state" id="state"></p>
+                <p><label for="phone_number">Phone Number:</label><input type="tel" name="phone_number" id="phone_number"></p>
+                <p><label for="passport_number">Passport Number:</label><input type="text" name="passport_number" id="passport_number"></p>
+                <p><label for="passport_expiration">Passport Expiration Date:</label><input type="date" name="passport_expiration" id="passport_expiration"></p>
+                <p><label for="passport_country">Passport Country:</label><input type="text" name="passport_country" id="passport_country"></p>
+                <p><label for="date_of_birth">Date of Birth:</label><input type="date" name="date_of_birth" id="date_of_birth"></p>
+                <div id="sb"><input type="submit" id="customer_submit" value="Register"></div>
+            </form>
+        </div>
+        <div class="form" id="agent">
+            <form action="/account/register_agent" method="post">
+                <p><label for="email">Email:</label> <input type="email" name="email" id="email"></p>
+                <p><label for="password">Password:</label> <input type="password" name="password" id="password"></p>
+                <div id="sb"><input type="submit" id="agent_submit" value="Register"></div>
+            </form>
+
+        </div>
+        <div class="form" id="staff">
+            <form action="/account/register_staff" method="post">
+                <p><label for="username">Username:</label> <input type="text" name="username" id="username"></p>
+                <p><label for="airline_name">Airline Name:</label> <input type="text" name="airline_name" id="airline_name"></p>
+                <p><label for="password">Password:</label> <input type="password" name="password" id="password"></p>
+                <p><label for="first_name">First Name:</label> <input type="text" name="first_name" id="first_name"></p>
+                <p><label for="last_name">Last Name:</label> <input type="text" name="last_name" id="last_name"></p>
+                <p><label for="date_of_birth">Date of Birth:</label> <input type="date" name="date_of_birth" id="date_of_birth"></p>
+                <div id="sb"><input type="submit" id="staff_submit" value="Register"></div>
+            </form>
+        </div>
+    </div>
+    <script>
+        // get the tabs and forms elements
+        var tabs = document.querySelectorAll(".tab");
+        var forms = document.querySelectorAll(".form");
+
+        // add a click event listener to each tab
+        tabs.forEach(function(tab) {
+            tab.addEventListener("click", function() {
+                // get the target form id from the data attribute
+                var target = tab.getAttribute("data-target");
+
+                // remove the active class from all tabs and forms
+                tabs.forEach(function(t) {
+                    t.classList.remove("active");
+                });
+                forms.forEach(function(f) {
+                    f.classList.remove("active");
+                });
+
+                // add the active class to the clicked tab and the target form
+                tab.classList.add("active");
+                document.getElementById(target).classList.add("active");
+            });
+        });
+
+        // activate the first tab and form by default
+        tabs[0].click();
+    </script>
+</body>
+</html>
