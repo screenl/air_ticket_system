@@ -26,18 +26,25 @@ def query_flight():
 def home():
     '''
     template params:
-    session - user data (dictionary)
+    
+    uses session
     '''
-    return render_template("about.html")
-    #return render_template("about.html",login={'username':'John Doe','profile':'https://www.gstatic.com/android/keyboard/emojikitchen/20220406/u1f349/u1f349_u1f605.png?fbx'}) 
+    #return render_template("about.html")
+    return render_template("about.html",
+       login={
+           'username':'John Doe',
+           'type': 'staff',
+           'profile':'https://www.gstatic.com/android/keyboard/emojikitchen/20220406/u1f349/u1f349_u1f605.png?fbx'}
+    ) 
 
 @bp.route('/status',methods=['GET'])
 def flight_status():
     '''
-    template params:
+    request params:
     result - a single row (dictionary) from the flight table, elsewise None
     airlines - list of airlines
-    session - user data (dictionary)
+
+    uses session
     '''
     return render_template('flight_status.html')
     #return render_template("flight_status.html",result={'airline_name':'CE','flight_num':555,'arrival_airport':'PVG','departure_airport':'JFK','status':'Delayed'})

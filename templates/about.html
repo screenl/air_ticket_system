@@ -45,6 +45,21 @@
       <div class="topnav">
         <a href="/public/status">View Flight Status</a> 
         <a href="/public/search_flight">Search for Flights</a>
+        {%if login%}
+          {%if login['type']=='customer'%}
+            <a href="/customer/my_flights">My Flights</a> 
+            <a href="/customer/spending">Track My Spending</a>
+          {%endif%}
+          {%if login['type']=='agent'%}
+            <a href="/agent/commission">My Commission</a> 
+            <a href="/agent/customers">View Top Customers</a>
+          {%endif%}
+          {%if login['type']=='staff'%}
+            <a href="/staff/my_flights">My Flights</a> 
+            <a href="/staff/manage">Manage Info</a> 
+            <a href="/agent/stats">View Statistics</a>
+          {%endif%}
+        {%endif%}
       </div>
       <div class="main_content">
         <h2>Air Ticket Reservation & Management System</h2>

@@ -9,30 +9,23 @@ bp = Blueprint('account',__name__,url_prefix='/account')
 def account():
     return 'hello'
 
-@bp.route('/login')
+@bp.route('/login',methods=['GET','POST'])
 def login():
+    if request.method=='POST':
+        print(request.form['type'])
+        return redirect("/public/home")
+    return render_template('login.html')
+
+@bp.route('/logout')
+def logout():
     return 'hello'
 
-@bp.route('/register')
+@bp.route('/register',methods=['GET','POST'])
 def register():
+    if request.method=='POST':
+        print(request.form['type'])
+        return redirect("/account/login")
     return render_template('register.html')
 
-@bp.route('/register_customer',methods=['POST'])
-def register_customer():
-    '''
-    handle customer registration
-    '''
-    return ''
 
-@bp.route('/register_agent',methods=['POST'])
-def register_agent():
-    return ''
-
-@bp.route('/register_staff',methods=['POST'])
-def register_staff():
-    return ''
-
-@bp.route('/auth',methods=['POST'])
-def auth():
-    return ''
 

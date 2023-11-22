@@ -13,42 +13,28 @@
     </div>
     <div id="forms">
         <div class="form" id="customer">
-            <form action="/account/register" method="post">
-                <p><label for="name">Name:</label> <input type="text" name="name" id="name"></p>
+            <form action="/account/login" method="post">
                 <p><label for="email">Email:</label><input type="email" name="email" id="email"></p>
                 <p><label for="password">Password:</label><input type="password" name="password" id="password"></p>
-                <p><label for="building_number">Building Number:</label><input type="number" name="building_number" id="building_number"></p>
-                <p><label for="street">Street:</label><input type="text" name="street" id="street"></p>
-                <p><label for="city">City:</label><input type="text" name="city" id="city"></p>
-                <p><label for="state">State:</label><input type="text" name="state" id="state"></p>
-                <p><label for="phone_number">Phone Number:</label><input type="tel" name="phone_number" id="phone_number"></p>
-                <p><label for="passport_number">Passport Number:</label><input type="text" name="passport_number" id="passport_number"></p>
-                <p><label for="passport_expiration">Passport Expiration Date:</label><input type="date" name="passport_expiration" id="passport_expiration"></p>
-                <p><label for="passport_country">Passport Country:</label><input type="text" name="passport_country" id="passport_country"></p>
-                <p><label for="date_of_birth">Date of Birth:</label><input type="date" name="date_of_birth" id="date_of_birth"></p>
                 <input type="text" name="type" id="type" value="customer" style="display: none;">
-                <div id="sb"><input type="submit" id="customer_submit" value="Register"></div>
+                <div id="sb"><input type="submit" id="customer_submit" value="Log In"></div>
             </form>
         </div>
         <div class="form" id="agent">
-            <form action="/account/register" method="post">
+            <form action="/account/login" method="post">
                 <p><label for="email">Email:</label> <input type="email" name="email" id="email"></p>
                 <p><label for="password">Password:</label> <input type="password" name="password" id="password"></p>
                 <input type="text" name="type" id="type" value="agent" style="display: none;">
-                <div id="sb"><input type="submit" id="agent_submit" value="Register"></div>
+                <div id="sb"><input type="submit" id="agent_submit" value="Log In"></div>
             </form>
 
         </div>
         <div class="form" id="staff">
-            <form action="/account/register" method="post">
+            <form action="/account/login" method="post">
                 <p><label for="username">Username:</label> <input type="text" name="username" id="username"></p>
-                <p><label for="airline_name">Airline Name:</label> <input type="text" name="airline_name" id="airline_name"></p>
                 <p><label for="password">Password:</label> <input type="password" name="password" id="password"></p>
-                <p><label for="first_name">First Name:</label> <input type="text" name="first_name" id="first_name"></p>
-                <p><label for="last_name">Last Name:</label> <input type="text" name="last_name" id="last_name"></p>
-                <p><label for="date_of_birth">Date of Birth:</label> <input type="date" name="date_of_birth" id="date_of_birth"></p>
                 <input type="text" name="type" id="type" value="staff" style="display: none;">
-                <div id="sb"><input type="submit" id="staff_submit" value="Register"></div>
+                <div id="sb"><input type="submit" id="staff_submit" value="Log In"></div>
             </form>
         </div>
     </div>

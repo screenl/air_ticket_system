@@ -1,7 +1,7 @@
 import os
 
 from flask import Flask,redirect
-from . import sql
+from . import sql, staff
 
 
 
@@ -34,7 +34,10 @@ def create_app(test_config=None):
     def index():
         return redirect("/public/home", code=302)
 
-    from . import public,account
+    from . import public, account, agent, customer
     app.register_blueprint(public.bp)
     app.register_blueprint(account.bp) 
+    app.register_blueprint(staff.bp)
+    app.register_blueprint(agent.bp)
+    app.register_blueprint(customer.bp)
     return app
