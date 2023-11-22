@@ -18,3 +18,7 @@ def manage():
 def stats():
     return ""
 
+@bp.route('/accounts',methods=['GET'])
+def accounts():
+    return ""
+

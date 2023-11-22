@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="/static/scripts/sorttable.js"></script>
+    <script src="/static/scripts/Chart.js"></script>
     <link rel="stylesheet" href="/static/styles/styles.css">
   </head>
   <body>
@@ -10,7 +10,7 @@
       <div class="profile">
         {%if login%}
           {%if 'profile' in login%}
-          <img src="{{login['profile']}}" alt="User" />
+            <img src="{{login['profile']}}" alt="User" />
           {%endif%}
         {%else%}
         <img src="/static/images/visitor_profile.png" alt="User" />
@@ -23,8 +23,6 @@
       </div>
       <div id="menu">
         {%if login%}
-        <button class="collapsible" onclick="window.location.href='/account'">My Account</button>
-        <button class="collapsible" onclick="window.location.href='/account/logout'">Log Out</button>
         {%else%}
         <button class="collapsible" onclick="window.location.href='/account/login'">Log In</button>
         <button class="collapsible" onclick="window.location.href='/account/register'">Sign Up</button>
@@ -38,7 +36,7 @@
     </div>
 
     <div id ="header" class="header">
-        <h1>View Flight Status</h1>
+        <h1>Track My Spending</h1>
       </div>
 
     <div id="main" class="main">
@@ -64,29 +62,15 @@
       </div>
       <div class="main_content">
         <form id="query_form" action="">
-          <div>
-          <label for="airline_name">Airline: </label> 
-          <select id="airline_name" name="airline_name">
-              <option value=""></option>
-              {% for a in airlines %}
-              <option value="{{a}}">{{a}}</option>
-              {% endfor %}
-          </select>
-          </div>
-  
-          <div>
-          <label for="flight_num">Flight Number</label>  
-          <input type="number" id="flight_num" name="flight_num">
-          </div>
 
           <div>
-          <label for="DATE(departure_time)">Departing</label>
-          <input type="date" id="DATE(departure_time)" name="DATE(departure_time)">
+          <label for="start">From: </label>
+          <input type="date" id="start" name="start">
           </div>
   
           <div>
-          <label for="DATE(arrival_time)">Arriving</label>
-          <input type="date" id="DATE(arrival_time)" name="DATE(arrival_time)"><br>
+          <label for="end">To: </label>
+          <input type="date" id="start" name="start"><br>
           </div>
   
           
@@ -94,11 +78,9 @@
           <input type="submit" value="Search">
           </div>
         </form> 
-        {% if result %}
-         <p id = "result">Flight <b>{{result['airline_name']}} {{result['flight_num']}}</b> from <b>{{result['departure_airport']}}</b> to <b>{{result['arrival_airport']}}</b> is currently <b>{{result['status']}}</b> </p>
-        {% else %}
-          <p id = "result">Please enter a valid input.</p>
-        {% endif %}
+        <div style="display: flex; align-items: center;width: 100%;justify-content: center;">
+          <canvas id="myChart" style="width:100%;max-width:700px"></canvas>
+        </div>
       </div>
     </div>
 
@@ -123,6 +105,25 @@
           }
         });
       }*/
+      const xValues = {{ months | tojson }};
+      const yValues = {{ money | tojson }};
+      var barColors = "purple";
+
+      new Chart("myChart", {
+        type: "bar",
+        data: {
+          labels: xValues,
+          datasets: [{
+            backgroundColor: barColors,
+            data: yValues
+          }]
+        },
+        options: {
+          legend: {display: false},
+          title: {display: true, text:"Money Spent Each Month (USD)"}
+        }
+
+      });
 
       function toggleSidebar() {
         var sidebar = document.getElementById("sidebar");

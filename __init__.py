@@ -30,9 +30,7 @@ def create_app(test_config=None):
     except OSError:
         pass
     
-    @app.route('/')
-    def index():
-        return redirect("/public/home", code=302)
+    app.route('/')(lambda : redirect("/public/home", code=302))
 
     from . import public, account, agent, customer
     app.register_blueprint(public.bp)

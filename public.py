@@ -25,15 +25,14 @@ def query_flight():
 @bp.route('/home')
 def home():
     '''
-    template params:
-    
-    uses session
+    template data:
+        login
     '''
     #return render_template("about.html")
     return render_template("about.html",
        login={
            'username':'John Doe',
-           'type': 'staff',
+           'type': 'customer',
            'profile':'https://www.gstatic.com/android/keyboard/emojikitchen/20220406/u1f349/u1f349_u1f605.png?fbx'}
     ) 
 
@@ -41,10 +40,14 @@ def home():
 def flight_status():
     '''
     request params:
-    result - a single row (dictionary) from the flight table, elsewise None
-    airlines - list of airlines
-
-    uses session
+        airline_name
+        flight_num
+        DATE(departure_time)
+        DATE(arrival_time)
+    template data:
+        result - a single row (dictionary) from the flight table, by default None
+        airlines - list of airlines
+        login
     '''
     return render_template('flight_status.html')
     #return render_template("flight_status.html",result={'airline_name':'CE','flight_num':555,'arrival_airport':'PVG','departure_airport':'JFK','status':'Delayed'})

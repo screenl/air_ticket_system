@@ -38,7 +38,7 @@
     </div>
 
     <div id ="header" class="header">
-        <h1>View Flight Status</h1>
+        <h1>View My Flights</h1>
       </div>
 
     <div id="main" class="main">
@@ -73,6 +73,15 @@
               {% endfor %}
           </select>
           </div>
+
+          <div>
+            <label for="status">Status: </label> 
+            <select id="status" name="status" selected="Upcoming">
+                <option value="Upcoming">Upcoming</option>
+                <option value="In-progress">In-progress</option>
+                <option value="Delayed">Delayed</option>
+            </select>
+          </div>
   
           <div>
           <label for="flight_num">Flight Number</label>  
@@ -94,11 +103,32 @@
           <input type="submit" value="Search">
           </div>
         </form> 
-        {% if result %}
-         <p id = "result">Flight <b>{{result['airline_name']}} {{result['flight_num']}}</b> from <b>{{result['departure_airport']}}</b> to <b>{{result['arrival_airport']}}</b> is currently <b>{{result['status']}}</b> </p>
-        {% else %}
-          <p id = "result">Please enter a valid input.</p>
-        {% endif %}
+        <table class="sortable">
+          <thead>
+              <tr>
+                  <th>Airline</th>
+                  <th>Flight Number</th>
+                  <th>Departure</th>
+                  <th>Arrival</th>
+                  <th>Departure Time</th>
+                  <th>Arrival Time</th>
+                  <th>Price</th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for r in result %}
+              <tr>
+                  <td>{{r['airline_name']}}</td>
+                  <td>{{r['flight_num']}}</td>
+                  <td>{{r['departure_airport']}}</td>
+                  <td>{{r['arrival_airport']}}</td>
+                  <td>{{r['departure_time']}}</td>
+                  <td>{{r['arrival_time']}}</td>
+                  <td>{{r['price']}}</td>
+              </tr>
+              {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
 
