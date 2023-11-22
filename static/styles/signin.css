@@ -1,0 +1,85 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    background-color: #610C9F;
+}
+
+h1 {
+    text-align: center;
+    color: white;
+    font-size: 40px;
+}
+.tab {
+    display: inline-block;
+    margin-bottom: 0px;
+    padding: 10px;
+    border: 1px solid black;
+    cursor: pointer;
+    background-color: white;
+}
+
+.tab.active {
+    background-color: rgb(194, 173, 230);
+}
+
+.form {
+    display: none;
+    margin: auto;
+    padding: 10px;
+    width: 800px;
+    border: 1px solid black;
+    background-color: white;
+}
+
+.form.active {
+    display: block;
+}
+
+
+
+
+.form p{
+    text-align: left;
+}
+
+.form label{
+    text-align: left;
+    margin-left: 15%;
+    font-size: 15px;
+}
+
+.form input{
+    text-align: left;
+    width:70%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-left: 15%;
+}
+
+.form input[type=submit]{
+    background-color: #610C9F;
+    border: none;
+    color: white;
+    width: auto;
+    padding: 16px;
+    margin-right: auto;
+    cursor: pointer;
+}
+
+.sb{
+    width: 100%;
+    text-align: center;
+}
+
+/* added styles to attach the tabs to the top border of the form and align them to the right */
+#tabs {
+    display: flex;
+    justify-content: flex-start;
+    margin: auto;
+    width: 822px;
+}
+
+#forms {
+    position: relative;
+    top: -1px;
+}
