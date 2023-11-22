@@ -8,7 +8,6 @@ bp = Blueprint('public',__name__,url_prefix='/public')
 
 @bp.route('/search_flight',methods=['GET'])
 def query_flight():
-    #todo: session
     prompt = request.args.to_dict()
     prompt['status']='Upcoming'
     req = 'SELECT * FROM flight WHERE ' + ' AND '.join((f'{i} = {repr(j)}' for i,j in prompt.items() if j!=''))
@@ -32,7 +31,7 @@ def home():
     return render_template("about.html",
        login={
            'username':'John Doe',
-           'type': 'customer',
+           'type': 'agent',
            'profile':'https://www.gstatic.com/android/keyboard/emojikitchen/20220406/u1f349/u1f349_u1f605.png?fbx'}
     ) 
 

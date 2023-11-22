@@ -50,9 +50,10 @@
             <a href="/customer/my_flights">My Flights</a> 
             <a href="/customer/spending">Track My Spending</a>
           {%endif%}
-          {%if login['type']=='agent'%}
+                    {%if login['type']=='agent'%}
             <a href="/agent/commission">My Commission</a> 
             <a href="/agent/customers">View Top Customers</a>
+            <a href="/agent/my_flights">View My Flights</a>
           {%endif%}
           {%if login['type']=='staff'%}
             <a href="/staff/my_flights">My Flights</a> 

@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="/static/scripts/Chart.js"></script>
     <link rel="stylesheet" href="/static/styles/styles.css">
   </head>
   <body>
@@ -79,9 +78,9 @@
           <input type="submit" value="Search">
           </div>
         </form> 
-        <div style="display: flex; align-items: center;width: 100%;justify-content: center;">
-          <canvas id="myChart" style="width:100%;max-width:700px"></canvas>
-        </div>
+        <p><b>Commission Received: </b>{{commission}}</p>
+        <p><b>Average Commission Per Ticket: </b>{{comm_per_ticket}}</p>
+        <p><b>Tickets Booked: </b>{{tickets}}</p>
       </div>
     </div>
 
@@ -106,25 +105,7 @@
           }
         });
       }*/
-      const xValues = {{ months | tojson }};
-      const yValues = {{ money | tojson }};
-      var barColors = "purple";
-
-      new Chart("myChart", {
-        type: "bar",
-        data: {
-          labels: xValues,
-          datasets: [{
-            backgroundColor: barColors,
-            data: yValues
-          }]
-        },
-        options: {
-          legend: {display: false},
-          title: {display: true, text:"Money Spent Each Month (USD)"}
-        }
-
-      });
+      
 
       function toggleSidebar() {
         var sidebar = document.getElementById("sidebar");

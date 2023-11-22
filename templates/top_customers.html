@@ -36,7 +36,7 @@
     </div>
 
     <div id ="header" class="header">
-        <h1>Track My Spending</h1>
+        <h1>View Top Customers</h1>
       </div>
 
     <div id="main" class="main">
@@ -48,7 +48,7 @@
             <a href="/customer/my_flights">My Flights</a> 
             <a href="/customer/spending">Track My Spending</a>
           {%endif%}
-                    {%if login['type']=='agent'%}
+          {%if login['type']=='agent'%}
             <a href="/agent/commission">My Commission</a> 
             <a href="/agent/customers">View Top Customers</a>
             <a href="/agent/my_flights">View My Flights</a>
@@ -62,25 +62,13 @@
         {%endif%}
       </div>
       <div class="main_content">
-        <form id="query_form" action="">
-
-          <div>
-          <label for="start">From: </label>
-          <input type="date" id="start" name="start">
-          </div>
-  
-          <div>
-          <label for="end">To: </label>
-          <input type="date" id="start" name="start"><br>
-          </div>
-  
-          
-          <div>
-          <input type="submit" value="Search">
-          </div>
-        </form> 
-        <div style="display: flex; align-items: center;width: 100%;justify-content: center;">
-          <canvas id="myChart" style="width:100%;max-width:700px"></canvas>
+        <div style="display: flex;width: 700px;justify-content: left;margin-left: auto;margin-right: auto;"> 
+          <button class="tab" id="ttab" onclick="show_t()"> View By Ticket Purchase</button>
+          <button class="tab" id="ctab" onclick="show_c()"> View By Commissions</button>
+        </div>
+        <div style="display: flex; align-items: center;width: 100%;justify-content: center; flex-direction: row;">
+          <canvas id="ticketChart" style="max-width:700px;display: none;"></canvas>
+          <canvas id="commissionChart" style="max-width:700px"></canvas>
         </div>
       </div>
     </div>
@@ -106,25 +94,59 @@
           }
         });
       }*/
-      const xValues = {{ months | tojson }};
-      const yValues = {{ money | tojson }};
+      const namest = {{ namest | tojson }};
+      const namesc = {{ namesc | tojson }}
+      const tickets = {{ tickets | tojson }};
+      const commission = {{ commission | tojson }};
       var barColors = "purple";
 
-      new Chart("myChart", {
+      new Chart("ticketChart", {
         type: "bar",
         data: {
-          labels: xValues,
+          labels: namest,
           datasets: [{
             backgroundColor: barColors,
-            data: yValues
+            data: tickets
           }]
         },
         options: {
           legend: {display: false},
-          title: {display: true, text:"Money Spent Each Month (USD)"}
+          title: {display: true, text:"Top 5 Customers (Ticket)"}
         }
 
       });
+
+      new Chart("commissionChart", {
+        type: "bar",
+        data: {
+          labels: namesc,
+          datasets: [{
+            backgroundColor: barColors,
+            data: commission
+          }]
+        },
+        options: {
+          legend: {display: false},
+          title: {display: true, text:"Top 5 Customers (Commission)"}
+        }
+
+      });
+      var t = document.getElementById("ticketChart");
+      var c = document.getElementById("commissionChart"); 
+      var ttab = document.getElementById("ttab");
+      var ctab = document.getElementById("ctab"); 
+      function show_c(){
+        ttab.classList.remove("active");
+        ctab.classList.add("active");
+        c.style.display="block";
+        t.style.display="none";
+      }
+      function show_t(){
+        ctab.classList.remove("active");
+        ttab.classList.add("active");
+        t.style.display="block";
+        c.style.display="none";
+      }
 
       function toggleSidebar() {
         var sidebar = document.getElementById("sidebar");

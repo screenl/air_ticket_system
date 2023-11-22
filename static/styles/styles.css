@@ -203,3 +203,15 @@ th:nth-child(even) {
 #result {
     font-size: 25px;
 }
+.tab{
+    display: inline-block;
+    margin-bottom: 0px;
+    padding: 10px;
+    border: 1px solid black;
+    cursor: pointer;
+    background-color: white;
+}
+
+.tab.active {
+    background-color: rgb(194, 173, 230);
+}
