@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="/static/scripts/sorttable.js"></script>
+    <link rel="stylesheet" href="/static/styles/styles.css">
+  </head>
+  <body>
+
+    <div id="sidebar" class="sidenav">
+      <div class="profile">
+        {%if login%}
+          {%if 'profile' in login%}
+          <img src="{{login['profile']}}" alt="User" />
+          {%endif%}
+        {%else%}
+        <img src="/static/images/visitor_profile.png" alt="User" />
+        {%endif%}
+        {%if login%}
+        <div id="uname"> <h3>{{login['username']}}</h3> </div>
+        {%else%}
+        <div id="uname"> <h3>Visitor</h3> </div>
+        {%endif%}
+      </div>
+      <div id="menu">
+        {%if login%}
+        <button class="collapsible" onclick="window.location.href='/account'">My Account</button>
+        <button class="collapsible" onclick="window.location.href='/account/logout'">Log Out</button>
+        {%else%}
+        <button class="collapsible" onclick="window.location.href='/account/login'">Log In</button>
+        <button class="collapsible" onclick="window.location.href='/account/register'">Sign Up</button>
+        {%endif%}
+        <button class="collapsible" onclick="window.location.href='/public/search_flight'">View Public Info</button>
+        <button class="collapsible" onclick="window.location.href='/public/home'" >About</button>
+      </div>
+      <div id="toggle">
+        <button id="tbutton" onclick="toggleSidebar()"> << </button>
+      </div>
+    </div>
+
+    <div id ="header" class="header">
+        <h1>Welcome!</h1>
+      </div>
+
+    <div id="main" class="main">
+      <div class="topnav">
+        <a href="/public/status">View Flight Status</a> 
+        <a href="/public/search_flight">Search for Flights</a>
+        {%if login%}
+          {%if login['type']=='customer'%}
+            <a href="/customer/my_flights">My Flights</a> 
+            <a href="/customer/spending">Track My Spending</a>
+          {%endif%}
+                    {%if login['type']=='agent'%}
+            <a href="/agent/commission">My Commission</a> 
+            <a href="/agent/customers">View Top Customers</a>
+            <a href="/agent/my_flights">View My Flights</a>
+          {%endif%}
+          {%if login['type']=='staff'%}
+            <a href="/staff/my_flights">My Flights</a> 
+            <a href="/staff/manage">Manage Info</a> 
+            <a href="/staff/stats">View Statistics</a>            
+            <a href="/staff/accounts">Manage Accounts</a>
+          {%endif%}
+        {%endif%}
+      </div>
+      <div class="main_content">
+        <h2>Air Ticket Reservation & Management System</h2>
+        <p>
+          By Yufeng Xu and Puming Liu
+        </p>
+      </div>
+    </div>
+
+    <script>
+      /*// Get all the collapsible elements
+      var coll = document.getElementsByClassName("collapsible");
+
+      // Loop through the elements and add a click event listener
+      for (var i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function () {
+          // Toggle the "active" class
+          this.classList.toggle("active");
+
+          // Get the content element
+          var content = this.nextElementSibling;
+
+          // Toggle the visibility of the content
+          if (content.style.display === "block") {
+            content.style.display = "none";
+          } else {
+            content.style.display = "block";
+          }
+        });
+      }*/
+
+      function toggleSidebar() {
+        var sidebar = document.getElementById("sidebar");
+        var menu = document.getElementById("menu");
+        var header = document.getElementById("header");
+        var main = document.getElementById("main");
+        var uname = document.getElementById("uname");
+        var tb = document.getElementById("tbutton");
+        if (menu.style.display == "none") {
+            menu.style.display = "block";
+            uname.style.display = "block";
+            sidebar.style.width = "250px";
+            header.style.marginLeft = "250px";
+            main.style.marginLeft = "250px";
+            tb.innerHTML="<<";
+
+        } else {
+            menu.style.display = "none";
+            uname.style.display = "none";
+            sidebar.style.width = "90px";
+            header.style.marginLeft = "90px";
+            main.style.marginLeft = "90px";
+            tb.innerHTML=">>";
+        }
+    }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="/static/scripts/sorttable.js"></script>
+    <link rel="stylesheet" href="/static/styles/styles.css">
+  </head>
+  <body>
+
+    <div id="sidebar" class="sidenav">
+      <div class="profile">
+        {%if login%}
+          {%if 'profile' in login%}
+          <img src="{{login['profile']}}" alt="User" />
+          {%endif%}
+        {%else%}
+        <img src="/static/images/visitor_profile.png" alt="User" />
+        {%endif%}
+        {%if login%}
+        <div id="uname"> <h3>{{login['username']}}</h3> </div>
+        {%else%}
+        <div id="uname"> <h3>Visitor</h3> </div>
+        {%endif%}
+      </div>
+      <div id="menu">
+        {%if login%}
+        <button class="collapsible" onclick="window.location.href='/account'">My Account</button>
+        <button class="collapsible" onclick="window.location.href='/account/logout'">Log Out</button>
+        {%else%}
+        <button class="collapsible" onclick="window.location.href='/account/login'">Log In</button>
+        <button class="collapsible" onclick="window.location.href='/account/register'">Sign Up</button>
+        {%endif%}
+        <button class="collapsible" onclick="window.location.href='/public/search_flight'">View Public Info</button>
+        <button class="collapsible" onclick="window.location.href='/public/home'" >About</button>
+      </div>
+      <div id="toggle">
+        <button id="tbutton" onclick="toggleSidebar()"> << </button>
+      </div>
+    </div>
+
+    <div id ="header" class="header">
+        <h1>Manage Accounts</h1>
+      </div>
+
+    <div id="main" class="main">
+      <div class="topnav">
+        <a href="/public/status">View Flight Status</a> 
+        <a href="/public/search_flight">Search for Flights</a>
+        {%if login%}
+          {%if login['type']=='customer'%}
+            <a href="/customer/my_flights">My Flights</a> 
+            <a href="/customer/spending">Track My Spending</a>
+          {%endif%}
+                    {%if login['type']=='agent'%}
+            <a href="/agent/commission">My Commission</a> 
+            <a href="/agent/customers">View Top Customers</a>
+            <a href="/agent/my_flights">View My Flights</a>
+          {%endif%}
+          {%if login['type']=='staff'%}
+            <a href="/staff/my_flights">My Flights</a> 
+            <a href="/staff/manage">Manage Info</a> 
+            <a href="/staff/stats">View Statistics</a>            
+            <a href="/staff/accounts">Manage Accounts</a>
+          {%endif%}
+        {%endif%}
+      </div>
+      <div class="main_content">
+        <button type="button" class="collapsible_header">Add Booking Agent</button>
+        <div class="coll_header_content">
+          <form action="/staff/add_agent" method="post">
+            <p><label for="email">Email:</label> <input type="email" name="email" id="email"></p>
+            <input type="submit" value="Add">
+          </form>
+        </div> 
+        <button type="button" class="collapsible_header">Grant Permissions</button>
+        <div class="coll_header_content">
+          <form action="/staff/grant_permission" method="post">
+            <p><label for="username">Username:</label> <input name="username" id="username"></p>
+            <p><label for="permission">Permission:</label> <select name="permission" id="permission">
+              <option value="Admin">Admin</option>
+              <option value="Operator">Operator</option></select>
+            </p>
+            <input type="submit" value="Grant">
+          </form>
+        </div> 
+      </div>
+    </div>
+
+    <script>
+       var coll = document.getElementsByClassName("collapsible_header");
+      var i;
+
+      for (i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function() {
+          this.classList.toggle("active");
+          var content = this.nextElementSibling;
+          if (content.style.display === "block") {
+            content.style.display = "none";
+          } else {
+            content.style.display = "block";
+          }
+        });
+        } 
+
+      function toggleSidebar() {
+        var sidebar = document.getElementById("sidebar");
+        var menu = document.getElementById("menu");
+        var header = document.getElementById("header");
+        var main = document.getElementById("main");
+        var uname = document.getElementById("uname");
+        var tb = document.getElementById("tbutton");
+        if (menu.style.display == "none") {
+            menu.style.display = "block";
+            uname.style.display = "block";
+            sidebar.style.width = "250px";
+            header.style.marginLeft = "250px";
+            main.style.marginLeft = "250px";
+            tb.innerHTML="<<";
+
+        } else {
+            menu.style.display = "none";
+            uname.style.display = "none";
+            sidebar.style.width = "90px";
+            header.style.marginLeft = "90px";
+            main.style.marginLeft = "90px";
+            tb.innerHTML=">>";
+        }
+    }
+    </script>
+  </body>
+</html>

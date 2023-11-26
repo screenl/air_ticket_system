@@ -15,7 +15,7 @@ def my_flight():
         DATE(departure_time)
         DATE(arrival_time)
     template data:
-        result - a single row (dictionary) from the flight table, by default None
+        result - rows (dictionary) from the flight table, by default None
         airlines - list of airlines
         login
     '''

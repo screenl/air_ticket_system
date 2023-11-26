@@ -31,7 +31,7 @@ def home():
     return render_template("about.html",
        login={
            'username':'John Doe',
-           'type': 'agent',
+           'type': 'staff',
            'profile':'https://www.gstatic.com/android/keyboard/emojikitchen/20220406/u1f349/u1f349_u1f605.png?fbx'}
     ) 
 
