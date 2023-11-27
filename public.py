@@ -58,3 +58,7 @@ def flight_status():
 @bp.route('/purchase_flight',methods=['POST'])
 def purchase_flight():
     return jsonify({'message':'success'})
+
+@bp.route('redirect',methods=['GET'])
+def redir():
+    return render_template('redirecting.html',message=request.args.get('message',''),url=request.args.get('url','/'))

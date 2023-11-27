@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+    var countdown = 5;
+    setInterval(() => {
+        countdown-=1;
+        document.getElementById("countdown").innerText=`${countdown}s`;
+        if (countdown==0){
+            location.replace("{{url}}");
+        }
+    }, 1000);
+</script>
+</head>
+<body>
+    <h1>{{ message }}</h1>
+    <p>Redirecting to <a href="{{url}}">{{url}}</a> <b id="countdown">5s</b></p>
+</body>
+</html>
