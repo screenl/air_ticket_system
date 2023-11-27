@@ -38,7 +38,7 @@
     </div>
 
     <div id ="header" class="header">
-        <h1>Welcome!</h1>
+        <h1>View My Flights</h1>
       </div>
 
     <div id="main" class="main">
@@ -64,34 +64,70 @@
         {%endif%}
       </div>
       <div class="main_content">
-        <h2>Air Ticket Reservation & Management System</h2>
-        <p>
-          By Yufeng Xu and Puming Liu
-        </p>
+        <table class="sortable">
+        <thead>
+          <tr>
+              <th>Flight Number</th>
+              <th>Departure</th>
+              <th>Arrival</th>
+              <th>Departure Time</th>
+              <th>Arrival Time</th>
+              <th>Price</th>
+              <th>Status</th>
+              <th></th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for r in result %}
+          <tr>
+              <td>{{r['flight_num']}}</td>
+              <td>{{r['departure_airport']}}</td>
+              <td>{{r['arrival_airport']}}</td>
+              <td>{{r['departure_time']}}</td>
+              <td>{{r['arrival_time']}}</td>
+              <td>{{r['price']}}</td>
+              <td>{{r['status']}}</td>
+              <td><a href="" class="change_button" flight_num="{{r['flight_num']}}" airline_name="{{r['airline_name']}}">Change Status</a></td>
+          </tr>
+          {% endfor %}
+      </tbody>
+    </table>
       </div>
     </div>
 
     <script>
-      /*// Get all the collapsible elements
-      var coll = document.getElementsByClassName("collapsible");
-
-      // Loop through the elements and add a click event listener
-      for (var i = 0; i < coll.length; i++) {
-        coll[i].addEventListener("click", function () {
-          // Toggle the "active" class
-          this.classList.toggle("active");
-
-          // Get the content element
-          var content = this.nextElementSibling;
-
-          // Toggle the visibility of the content
-          if (content.style.display === "block") {
-            content.style.display = "none";
-          } else {
-            content.style.display = "block";
+      let purchases = document.querySelectorAll(".change_button");
+      purchases.forEach(e => {
+        e.addEventListener("click",function() {
+          let t = prompt(`Change the status of flight ${e.getAttribute('flight_num')} (Upcoming, In-progress or Delayed)`);
+          if (['Upcoming', 'In-progress', 'Delayed'].includes(t)){
+            change_status(e.getAttribute('airline_name'),e.getAttribute('flight_num'),t);
           }
-        });
-      }*/
+          else{
+            alert('Incorrect Input!');
+          }
+        })
+      });
+
+      function change_status(a_name, f_num,t){
+        const xhr = new XMLHttpRequest();
+        const body = {
+          airline_name: a_name,
+          flight_num: f_num,
+          status: t
+        }; 
+        xhr.open("POST", "/staff/change_status");
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onload = () => {
+          if (xhr.readyState == 4 && xhr.status == 200) {
+            alert("Change successfully made");
+          } else {
+            alert(`Error: ${xhr.message}`);
+          }
+          location.reload();
+        };
+        xhr.send(new URLSearchParams(body).toString());
+      }
 
       function toggleSidebar() {
         var sidebar = document.getElementById("sidebar");

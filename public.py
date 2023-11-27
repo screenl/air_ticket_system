@@ -1,7 +1,7 @@
 
 from . import sql 
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, session, url_for
+    Blueprint, flash, g, redirect, render_template, request, session, url_for, jsonify
 )
 
 bp = Blueprint('public',__name__,url_prefix='/public')
@@ -19,7 +19,11 @@ def query_flight():
         cursor.execute('SELECT name FROM airport')
         airports = map(lambda x: [*x.values()][0],cursor.fetchall())
         cursor.execute(req)
-        return render_template('search_for_flight.html',result=list(cursor.fetchall()),airlines=list(airlines),airports=list(airports))
+        return render_template('search_for_flight.html',result=list(cursor.fetchall()),airlines=list(airlines),airports=list(airports),login={
+           'username':'John Doe',
+           'type': 'customer',
+           'profile':'https://www.gstatic.com/android/keyboard/emojikitchen/20220406/u1f349/u1f349_u1f605.png?fbx'}
+    )
     
 @bp.route('/home')
 def home():
@@ -50,4 +54,7 @@ def flight_status():
     '''
     return render_template('flight_status.html')
     #return render_template("flight_status.html",result={'airline_name':'CE','flight_num':555,'arrival_airport':'PVG','departure_airport':'JFK','status':'Delayed'})
-    
+
+@bp.route('/purchase_flight',methods=['POST'])
+def purchase_flight():
+    return jsonify({'message':'success'})

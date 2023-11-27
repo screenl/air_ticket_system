@@ -122,6 +122,7 @@
         <div class="coll_header_content">
           <div style="display: flex;width: 100%;align-items: center;justify-content: center; margin: 10px;">
             <canvas id="revenue" style="width:100%;max-width:600px"></canvas>
+            <canvas id="revenue_y" style="width:100%;max-width:600px"></canvas>
           </div>
         </div>
 
@@ -269,7 +270,6 @@
 
 
     /* the fucking charts */
-    var RevValues = [55, 49];
 
     new Chart("revenue", {
       type: "pie",
@@ -283,13 +283,27 @@
       options: {
         title: {
           display: true,
-          text: "Revenue"
+          text: "Revenue (Last Month)"
         }
       }
     });
 
-    var months=['a','b','c'];
-    var sales=[1,2,3];
+    new Chart("revenue_y", {
+      type: "pie",
+      data: {
+        labels: ["Agents", "Customers"],
+        datasets: [{
+          backgroundColor: ["#2b5797","#b91d47"],
+          data: [{{revenue_agent_y}},{{revenue_customer_y}}]
+        }]
+      },
+      options: {
+        title: {
+          display: true,
+          text: "Revenue (Last Year)"
+        }
+      }
+    });
     </script>
   </body>
 </html>

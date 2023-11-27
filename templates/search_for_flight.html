@@ -23,6 +23,8 @@
       </div>
       <div id="menu">
         {%if login%}
+        <button class="collapsible" onclick="window.location.href='/account'">My Account</button>
+        <button class="collapsible" onclick="window.location.href='/account/logout'">Log Out</button>
         {%else%}
         <button class="collapsible" onclick="window.location.href='/account/login'">Log In</button>
         <button class="collapsible" onclick="window.location.href='/account/register'">Sign Up</button>
@@ -118,6 +120,11 @@
                   <th>Departure Time</th>
                   <th>Arrival Time</th>
                   <th>Price</th>
+                  {%if login%}
+                    {%if login['type']=='customer' or login['type']=='agent'%}
+                  <th></th>
+                  {%endif%}
+                  {%endif%}
               </tr>
           </thead>
           <tbody>
@@ -130,6 +137,11 @@
                   <td>{{r['departure_time']}}</td>
                   <td>{{r['arrival_time']}}</td>
                   <td>{{r['price']}}</td>
+                  {%if login%}
+                    {%if login['type']=='customer' or login['type']=='agent'%}
+                  <td class="purchase"><a href="" class="purchase_button" flight_num="{{r['flight_num']}}" airline_name="{{r['airline_name']}}">Purchase</a></td>
+                  {%endif%}
+                  {%endif%}
               </tr>
               {% endfor %}
           </tbody>
@@ -138,27 +150,32 @@
     </div>
 
     <script>
-      /*// Get all the collapsible elements
-      var coll = document.getElementsByClassName("collapsible");
-
-      // Loop through the elements and add a click event listener
-      for (var i = 0; i < coll.length; i++) {
-        coll[i].addEventListener("click", function () {
-          // Toggle the "active" class
-          this.classList.toggle("active");
-
-          // Get the content element
-          var content = this.nextElementSibling;
-
-          // Toggle the visibility of the content
-          if (content.style.display === "block") {
-            content.style.display = "none";
-          } else {
-            content.style.display = "block";
+      let purchases = document.querySelectorAll(".purchase_button");
+      purchases.forEach(e => {
+        e.addEventListener("click",function() {
+          if(confirm(`Are you sure to purchase a ticket for flight ${e.getAttribute('flight_num')} at ${e.getAttribute('airline_name')}?`)){
+            purchase_flight(e.getAttribute('airline_name'),e.getAttribute('flight_num'));
           }
         });
-      }*/
+      });
 
+      function purchase_flight(a_name, f_num){
+        const xhr = new XMLHttpRequest();
+        const body = {
+          airline_name: a_name,
+          flight_num: f_num
+        }; 
+        xhr.open("POST", "/public/purchase_flight");
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onload = () => {
+          if (xhr.readyState == 4 && xhr.status == 200) {
+            alert("Purchase successfully made!");
+          } else {
+            alert(`Error: ${xhr.message}`);
+          }
+        };
+        xhr.send(new URLSearchParams(body).toString());
+      }
       function toggleSidebar() {
         var sidebar = document.getElementById("sidebar");
         var menu = document.getElementById("menu");
