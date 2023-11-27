@@ -2,6 +2,7 @@
 <html>
   <head>
     <script src="/static/scripts/sorttable.js"></script>
+    <script src="/static/scripts/Chart.js"></script>
     <link rel="stylesheet" href="/static/styles/styles.css">
   </head>
   <body>
@@ -38,7 +39,7 @@
     </div>
 
     <div id ="header" class="header">
-        <h1>Welcome!</h1>
+        <h1>View Statistics</h1>
       </div>
 
     <div id="main" class="main">
@@ -64,35 +65,87 @@
         {%endif%}
       </div>
       <div class="main_content">
-        <a>View Top Booking Agents</a><br>
-        <a>View Frequent Customers</a><br>
-        <a>View Reports</a><br>
-        <a>Comparison of Revenues</a><br>
-        <a>View Top Destinations</a><br>
+        <button type="button" class="collapsible_header">View Top Booking Agents</button>
+        <div class="coll_header_content">
+          <h3>The top 5 booking agents (number of tickets sales) for the past month are:</h3>
+          <ol>
+            {% for r in top_agent_sales %}
+            <p><li>{{r}}</li></p>
+            {% endfor %}
+          </ol>
+          <h3>The top 5 booking agents (amount of commission received) for the past year are:</h3>
+          <ol>
+            {% for r in top_agent_commissions %}
+            <p><li>{{r}}</li></p>
+            {% endfor %}
+          </ol>
+        </div>
+
+
+        <button type="button" class="collapsible_header">View Frequent Customers</button>
+        <div class="coll_header_content">
+          <p style="margin: 10px;">The most Frequent Customer in the past year is <b>{{most_frequent}}</b>.</p>
+          <form action="" id="customer_find">
+            <p><label for="email">Find all flights</label> <input type="email" name="email" id="email" placeholder="User Email"> <label>has taken</label></p>
+            <p><input type="submit" value="Find"></p>
+          </form>
+          <div>
+            <ul id="customer_find_res">
+            </ul>
+          </div>
+        </div>
+
+
+        <button type="button" class="collapsible_header">View Reports</button>
+        <div class="coll_header_content">
+          <form id="get_sales_form" action="">
+            <p>
+            <label for="start">From: </label>
+            <input type="date" id="start" name="start">
+            </p>
+            <p>
+            <label for="end">To: </label>
+            <input type="date" id="end" name="end"><br>
+            </p>
+            <p>
+            <input type="submit" value="Search">
+            </p>
+          </form> 
+          <div style="display: flex; align-items: center;width: 100%;justify-content: center; flex-direction: column;">
+            <p id="reports_res"></p>
+            <canvas id="report" style="width:100%;max-width:700px"></canvas>
+          </div>
+        </div>
+
+
+        <button type="button" class="collapsible_header">Comparison of Revenues</button>
+        <div class="coll_header_content">
+          <div style="display: flex;width: 100%;align-items: center;justify-content: center; margin: 10px;">
+            <canvas id="revenue" style="width:100%;max-width:600px"></canvas>
+          </div>
+        </div>
+
+
+        <button type="button" class="collapsible_header">View Top Destinations</button>
+        <div class="coll_header_content">
+          <h3>The top 3 destinations for the past 3 months are:</h3>
+          <ol>
+            {% for r in top_dest_month %}
+            <p><li>{{r}}</li></p>
+            {% endfor %}
+          </ol>
+          <h3>The top 3 destinations for the past year are:</h3>
+          <ol>
+            {% for r in top_dest_year %}
+            <p><li>{{r}}</li></p>
+            {% endfor %}
+          </ol>
+        </div>
+      </ul>
       </div>
     </div>
 
     <script>
-      /*// Get all the collapsible elements
-      var coll = document.getElementsByClassName("collapsible");
-
-      // Loop through the elements and add a click event listener
-      for (var i = 0; i < coll.length; i++) {
-        coll[i].addEventListener("click", function () {
-          // Toggle the "active" class
-          this.classList.toggle("active");
-
-          // Get the content element
-          var content = this.nextElementSibling;
-
-          // Toggle the visibility of the content
-          if (content.style.display === "block") {
-            content.style.display = "none";
-          } else {
-            content.style.display = "block";
-          }
-        });
-      }*/
       var coll = document.getElementsByClassName("collapsible_header");
       var i;
 
@@ -132,6 +185,111 @@
             tb.innerHTML=">>";
         }
     }
+
+    let customer_find = document.getElementById("customer_find");
+    customer_find.addEventListener("submit", (e) => {
+      e.preventDefault();
+      get_customer_flights();
+    });
+
+    let get_sales_form = document.getElementById("get_sales_form");
+    get_sales_form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      get_sales();
+    });
+
+    
+
+
+    /*The almighty ajax, please save us from the atrocities of template*/
+    function get_customer_flights(){
+      const xhr = new XMLHttpRequest();
+      const body = {
+        email: document.getElementById("email").value,
+      }; 
+      xhr.open("GET", "/staff/get_customer_flights?"+new URLSearchParams(body).toString());
+      xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      xhr.onload = () => {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+          ret = JSON.parse(xhr.responseText);
+          let customer_find_res = document.getElementById("customer_find_res");
+          let k = "";
+          ret.flights.forEach(i => {
+            console.log(i);
+            k+=`<p><li>Flight Number ${i.number} from ${i.from} to ${i.to}</li></p>`;
+          });
+          customer_find_res.innerHTML=k;
+        } else {
+          console.log(`Error: ${xhr.status}`);
+        }
+      };
+      xhr.send();
+    }
+
+    function get_sales(){
+      const xhr = new XMLHttpRequest();
+      const body = {
+        start: document.getElementById("start").value,
+        end: document.getElementById("end").value
+      }; 
+      xhr.open("GET", "/staff/get_monthly_sales?"+new URLSearchParams(body).toString());
+      xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      xhr.onload = () => {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+          ret = JSON.parse(xhr.responseText);
+          let report_res = document.getElementById("reports_res");
+          report_res.innerHTML = `Total Tickets Sold: <b>${ret.total_sales}</b>`;
+          months = [];
+          sales = [];
+          ret.monthly_sales.forEach(i => {
+            months.push(i.month);
+            sales.push(i.sales);
+          });
+          new Chart("report", {
+            type: "bar",
+            data: {
+              labels: months,
+              datasets: [{
+                backgroundColor: "purple",
+                data: sales
+              }]
+            },
+            options: {
+              legend: {display: false},
+              title: {display: true, text:"Tickets Sold Each Month"}
+            }
+        });
+        } else {
+          console.log(`Error: ${xhr.status}`);
+        }
+      };
+      xhr.send();
+    }
+
+
+
+    /* the fucking charts */
+    var RevValues = [55, 49];
+
+    new Chart("revenue", {
+      type: "pie",
+      data: {
+        labels: ["Agents", "Customers"],
+        datasets: [{
+          backgroundColor: ["#2b5797","#b91d47"],
+          data: [{{revenue_agent}},{{revenue_customer}}]
+        }]
+      },
+      options: {
+        title: {
+          display: true,
+          text: "Revenue"
+        }
+      }
+    });
+
+    var months=['a','b','c'];
+    var sales=[1,2,3];
     </script>
   </body>
 </html>
