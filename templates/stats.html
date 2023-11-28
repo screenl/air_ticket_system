@@ -1,191 +1,104 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <script src="/static/scripts/sorttable.js"></script>
-    <script src="/static/scripts/Chart.js"></script>
-    <link rel="stylesheet" href="/static/styles/styles.css">
-  </head>
-  <body>
+{% extends "base.html" %}
 
-    <div id="sidebar" class="sidenav">
-      <div class="profile">
-        {%if login%}
-          {%if 'profile' in login%}
-          <img src="{{login['profile']}}" alt="User" />
-          {%endif%}
-        {%else%}
-        <img src="/static/images/visitor_profile.png" alt="User" />
-        {%endif%}
-        {%if login%}
-        <div id="uname"> <h3>{{login['username']}}</h3> </div>
-        {%else%}
-        <div id="uname"> <h3>Visitor</h3> </div>
-        {%endif%}
-      </div>
-      <div id="menu">
-        {%if login%}
-        <button class="collapsible" onclick="window.location.href='/account'">My Account</button>
-        <button class="collapsible" onclick="window.location.href='/account/logout'">Log Out</button>
-        {%else%}
-        <button class="collapsible" onclick="window.location.href='/account/login'">Log In</button>
-        <button class="collapsible" onclick="window.location.href='/account/register'">Sign Up</button>
-        {%endif%}
-        <button class="collapsible" onclick="window.location.href='/public/search_flight'">View Public Info</button>
-        <button class="collapsible" onclick="window.location.href='/public/home'" >About</button>
-      </div>
-      <div id="toggle">
-        <button id="tbutton" onclick="toggleSidebar()"> << </button>
-      </div>
-    </div>
+{% block title %}View Statistics{% endblock %}
 
-    <div id ="header" class="header">
-        <h1>View Statistics</h1>
-      </div>
-
-    <div id="main" class="main">
-      <div class="topnav">
-        <a href="/public/status">View Flight Status</a> 
-        <a href="/public/search_flight">Search for Flights</a>
-        {%if login%}
-          {%if login['type']=='customer'%}
-            <a href="/customer/my_flights">My Flights</a> 
-            <a href="/customer/spending">Track My Spending</a>
-          {%endif%}
-                    {%if login['type']=='agent'%}
-            <a href="/agent/commission">My Commission</a> 
-            <a href="/agent/customers">View Top Customers</a>
-            <a href="/agent/my_flights">View My Flights</a>
-          {%endif%}
-          {%if login['type']=='staff'%}
-            <a href="/staff/my_flights">My Flights</a> 
-            <a href="/staff/manage">Manage Info</a> 
-            <a href="/staff/stats">View Statistics</a>            
-            <a href="/staff/accounts">Manage Accounts</a>
-          {%endif%}
-        {%endif%}
-      </div>
-      <div class="main_content">
-        <button type="button" class="collapsible_header">View Top Booking Agents</button>
-        <div class="coll_header_content">
-          <h3>The top 5 booking agents (number of tickets sales) for the past month are:</h3>
-          <ol>
-            {% for r in top_agent_sales %}
-            <p><li>{{r}}</li></p>
-            {% endfor %}
-          </ol>
-          <h3>The top 5 booking agents (amount of commission received) for the past year are:</h3>
-          <ol>
-            {% for r in top_agent_commissions %}
-            <p><li>{{r}}</li></p>
-            {% endfor %}
-          </ol>
-        </div>
+{% block content %}
+  <button type="button" class="collapsible_header">View Top Booking Agents</button>
+  <div class="coll_header_content">
+    <h3>The top 5 booking agents (number of tickets sales) for the past month are:</h3>
+    <ol>
+      {% for r in top_agent_sales %}
+      <p><li>{{r}}</li></p>
+      {% endfor %}
+    </ol>
+    <h3>The top 5 booking agents (amount of commission received) for the past year are:</h3>
+    <ol>
+      {% for r in top_agent_commissions %}
+      <p><li>{{r}}</li></p>
+      {% endfor %}
+    </ol>
+  </div>
 
 
-        <button type="button" class="collapsible_header">View Frequent Customers</button>
-        <div class="coll_header_content">
-          <p style="margin: 10px;">The most Frequent Customer in the past year is <b>{{most_frequent}}</b>.</p>
-          <form action="" id="customer_find">
-            <p><label for="email">Find all flights</label> <input type="email" name="email" id="email" placeholder="User Email"> <label>has taken</label></p>
-            <p><input type="submit" value="Find"></p>
-          </form>
-          <div>
-            <ul id="customer_find_res">
-            </ul>
-          </div>
-        </div>
-
-
-        <button type="button" class="collapsible_header">View Reports</button>
-        <div class="coll_header_content">
-          <form id="get_sales_form" action="">
-            <p>
-            <label for="start">From: </label>
-            <input type="date" id="start" name="start">
-            </p>
-            <p>
-            <label for="end">To: </label>
-            <input type="date" id="end" name="end"><br>
-            </p>
-            <p>
-            <input type="submit" value="Search">
-            </p>
-          </form> 
-          <div style="display: flex; align-items: center;width: 100%;justify-content: center; flex-direction: column;">
-            <p id="reports_res"></p>
-            <canvas id="report" style="width:100%;max-width:700px"></canvas>
-          </div>
-        </div>
-
-
-        <button type="button" class="collapsible_header">Comparison of Revenues</button>
-        <div class="coll_header_content">
-          <div style="display: flex;width: 100%;align-items: center;justify-content: center; margin: 10px;">
-            <canvas id="revenue" style="width:100%;max-width:600px"></canvas>
-            <canvas id="revenue_y" style="width:100%;max-width:600px"></canvas>
-          </div>
-        </div>
-
-
-        <button type="button" class="collapsible_header">View Top Destinations</button>
-        <div class="coll_header_content">
-          <h3>The top 3 destinations for the past 3 months are:</h3>
-          <ol>
-            {% for r in top_dest_month %}
-            <p><li>{{r}}</li></p>
-            {% endfor %}
-          </ol>
-          <h3>The top 3 destinations for the past year are:</h3>
-          <ol>
-            {% for r in top_dest_year %}
-            <p><li>{{r}}</li></p>
-            {% endfor %}
-          </ol>
-        </div>
+  <button type="button" class="collapsible_header">View Frequent Customers</button>
+  <div class="coll_header_content">
+    <p style="margin: 10px;">The most Frequent Customer in the past year is <b>{{most_frequent}}</b>.</p>
+    <form action="" id="customer_find">
+      <p><label for="email">Find all flights</label> <input type="email" name="email" id="email" placeholder="User Email"> <label>has taken</label></p>
+      <p><input type="submit" value="Find"></p>
+    </form>
+    <div>
+      <ul id="customer_find_res">
       </ul>
-      </div>
     </div>
+  </div>
 
-    <script>
-      var coll = document.getElementsByClassName("collapsible_header");
-      var i;
 
-      for (i = 0; i < coll.length; i++) {
-        coll[i].addEventListener("click", function() {
-          this.classList.toggle("active");
-          var content = this.nextElementSibling;
-          if (content.style.display === "block") {
-            content.style.display = "none";
-          } else {
-            content.style.display = "block";
-          }
-        });
-        } 
+  <button type="button" class="collapsible_header">View Reports</button>
+  <div class="coll_header_content">
+    <form id="get_sales_form" action="">
+      <p>
+      <label for="start">From: </label>
+      <input type="date" id="start" name="start">
+      </p>
+      <p>
+      <label for="end">To: </label>
+      <input type="date" id="end" name="end"><br>
+      </p>
+      <p>
+      <input type="submit" value="Search">
+      </p>
+    </form> 
+    <div style="display: flex; align-items: center;width: 100%;justify-content: center; flex-direction: column;">
+      <p id="reports_res"></p>
+      <canvas id="report" style="width:100%;max-width:700px"></canvas>
+    </div>
+  </div>
 
-      function toggleSidebar() {
-        var sidebar = document.getElementById("sidebar");
-        var menu = document.getElementById("menu");
-        var header = document.getElementById("header");
-        var main = document.getElementById("main");
-        var uname = document.getElementById("uname");
-        var tb = document.getElementById("tbutton");
-        if (menu.style.display == "none") {
-            menu.style.display = "block";
-            uname.style.display = "block";
-            sidebar.style.width = "250px";
-            header.style.marginLeft = "250px";
-            main.style.marginLeft = "250px";
-            tb.innerHTML="<<";
 
+  <button type="button" class="collapsible_header">Comparison of Revenues</button>
+  <div class="coll_header_content">
+    <div style="display: flex;width: 100%;align-items: center;justify-content: center; margin: 10px;">
+      <canvas id="revenue" style="width:100%;max-width:600px"></canvas>
+      <canvas id="revenue_y" style="width:100%;max-width:600px"></canvas>
+    </div>
+  </div>
+
+
+  <button type="button" class="collapsible_header">View Top Destinations</button>
+  <div class="coll_header_content">
+    <h3>The top 3 destinations for the past 3 months are:</h3>
+    <ol>
+      {% for r in top_dest_month %}
+      <p><li>{{r}}</li></p>
+      {% endfor %}
+    </ol>
+    <h3>The top 3 destinations for the past year are:</h3>
+    <ol>
+      {% for r in top_dest_year %}
+      <p><li>{{r}}</li></p>
+      {% endfor %}
+    </ol>
+  </div>
+{% endblock %}
+
+{% block additional_script %}
+  <script src="/static/scripts/Chart.js"></script>
+  <script>
+    var coll = document.getElementsByClassName("collapsible_header");
+    var i;
+
+    for (i = 0; i < coll.length; i++) {
+      coll[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        if (content.style.display === "block") {
+          content.style.display = "none";
         } else {
-            menu.style.display = "none";
-            uname.style.display = "none";
-            sidebar.style.width = "90px";
-            header.style.marginLeft = "90px";
-            main.style.marginLeft = "90px";
-            tb.innerHTML=">>";
+          content.style.display = "block";
         }
-    }
+      });
+      } 
 
     let customer_find = document.getElementById("customer_find");
     customer_find.addEventListener("submit", (e) => {
@@ -198,9 +111,6 @@
       e.preventDefault();
       get_sales();
     });
-
-    
-
 
     /*The almighty ajax, please save us from the atrocities of template*/
     function get_customer_flights(){
@@ -304,6 +214,5 @@
         }
       }
     });
-    </script>
-  </body>
-</html>
+  </script>
+{% endblock %}

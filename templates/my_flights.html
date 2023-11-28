@@ -1,164 +1,72 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <script src="/static/scripts/sorttable.js"></script>
-    <link rel="stylesheet" href="/static/styles/styles.css">
-  </head>
-  <body>
+{% extends "base.html" %}
 
-    <div id="sidebar" class="sidenav">
-      <div class="profile">
-        {%if login%}
-          {%if 'profile' in login%}
-          <img src="{{login['profile']}}" alt="User" />
-          {%endif%}
-        {%else%}
-        <img src="/static/images/visitor_profile.png" alt="User" />
-        {%endif%}
-        {%if login%}
-        <div id="uname"> <h3>{{login['username']}}</h3> </div>
-        {%else%}
-        <div id="uname"> <h3>Visitor</h3> </div>
-        {%endif%}
-      </div>
-      <div id="menu">
-        {%if login%}
-        <button class="collapsible" onclick="window.location.href='/account'">My Account</button>
-        <button class="collapsible" onclick="window.location.href='/account/logout'">Log Out</button>
-        {%else%}
-        <button class="collapsible" onclick="window.location.href='/account/login'">Log In</button>
-        <button class="collapsible" onclick="window.location.href='/account/register'">Sign Up</button>
-        {%endif%}
-        <button class="collapsible" onclick="window.location.href='/public/search_flight'">View Public Info</button>
-        <button class="collapsible" onclick="window.location.href='/public/home'" >About</button>
-      </div>
-      <div id="toggle">
-        <button id="tbutton" onclick="toggleSidebar()"> << </button>
-      </div>
+{% block title %}View My Flights{% endblock %}
+
+{% block content %}
+  <form id="query_form" action="">
+    <div>
+    <label for="airline_name">Airline: </label> 
+    <select id="airline_name" name="airline_name">
+        <option value=""></option>
+        {% for a in airlines %}
+        <option value="{{a}}">{{a}}</option>
+        {% endfor %}
+    </select>
     </div>
 
-    <div id ="header" class="header">
-        <h1>View My Flights</h1>
-      </div>
-
-    <div id="main" class="main">
-      <div class="topnav">
-        <a href="/public/status">View Flight Status</a> 
-        <a href="/public/search_flight">Search for Flights</a>
-        {%if login%}
-          {%if login['type']=='customer'%}
-            <a href="/customer/my_flights">My Flights</a> 
-            <a href="/customer/spending">Track My Spending</a>
-          {%endif%}
-                    {%if login['type']=='agent'%}
-            <a href="/agent/commission">My Commission</a> 
-            <a href="/agent/customers">View Top Customers</a>
-            <a href="/agent/my_flights">View My Flights</a>
-          {%endif%}
-          {%if login['type']=='staff'%}
-            <a href="/staff/my_flights">My Flights</a> 
-            <a href="/staff/manage">Manage Info</a> 
-            <a href="/staff/stats">View Statistics</a>            
-            <a href="/staff/accounts">Manage Accounts</a>
-          {%endif%}
-        {%endif%}
-      </div>
-      <div class="main_content">
-        <form id="query_form" action="">
-          <div>
-          <label for="airline_name">Airline: </label> 
-          <select id="airline_name" name="airline_name">
-              <option value=""></option>
-              {% for a in airlines %}
-              <option value="{{a}}">{{a}}</option>
-              {% endfor %}
-          </select>
-          </div>
-
-          <div>
-            <label for="status">Status: </label> 
-            <select id="status" name="status" selected="Upcoming">
-                <option value="Upcoming">Upcoming</option>
-                <option value="In-progress">In-progress</option>
-                <option value="Delayed">Delayed</option>
-            </select>
-          </div>
-  
-          <div>
-          <label for="flight_num">Flight Number</label>  
-          <input type="number" id="flight_num" name="flight_num">
-          </div>
-
-          <div>
-          <label for="DATE(departure_time)">Departing</label>
-          <input type="date" id="DATE(departure_time)" name="DATE(departure_time)">
-          </div>
-  
-          <div>
-          <label for="DATE(arrival_time)">Arriving</label>
-          <input type="date" id="DATE(arrival_time)" name="DATE(arrival_time)"><br>
-          </div>
-  
-          
-          <div>
-          <input type="submit" value="Search">
-          </div>
-        </form> 
-        <table class="sortable">
-          <thead>
-              <tr>
-                  <th>Airline</th>
-                  <th>Flight Number</th>
-                  <th>Departure</th>
-                  <th>Arrival</th>
-                  <th>Departure Time</th>
-                  <th>Arrival Time</th>
-                  <th>Price</th>
-              </tr>
-          </thead>
-          <tbody>
-              {% for r in result %}
-              <tr>
-                  <td>{{r['airline_name']}}</td>
-                  <td>{{r['flight_num']}}</td>
-                  <td>{{r['departure_airport']}}</td>
-                  <td>{{r['arrival_airport']}}</td>
-                  <td>{{r['departure_time']}}</td>
-                  <td>{{r['arrival_time']}}</td>
-                  <td>{{r['price']}}</td>
-              </tr>
-              {% endfor %}
-          </tbody>
-        </table>
-      </div>
+    <div>
+      <label for="status">Status: </label> 
+      <select id="status" name="status" selected="Upcoming">
+          <option value="Upcoming">Upcoming</option>
+          <option value="In-progress">In-progress</option>
+          <option value="Delayed">Delayed</option>
+      </select>
     </div>
 
-    <script>
+    <div>
+    <label for="flight_num">Flight Number</label>  
+    <input type="number" id="flight_num" name="flight_num">
+    </div>
 
-      function toggleSidebar() {
-        var sidebar = document.getElementById("sidebar");
-        var menu = document.getElementById("menu");
-        var header = document.getElementById("header");
-        var main = document.getElementById("main");
-        var uname = document.getElementById("uname");
-        var tb = document.getElementById("tbutton");
-        if (menu.style.display == "none") {
-            menu.style.display = "block";
-            uname.style.display = "block";
-            sidebar.style.width = "250px";
-            header.style.marginLeft = "250px";
-            main.style.marginLeft = "250px";
-            tb.innerHTML="<<";
+    <div>
+    <label for="DATE(departure_time)">Departing</label>
+    <input type="date" id="DATE(departure_time)" name="DATE(departure_time)">
+    </div>
 
-        } else {
-            menu.style.display = "none";
-            uname.style.display = "none";
-            sidebar.style.width = "90px";
-            header.style.marginLeft = "90px";
-            main.style.marginLeft = "90px";
-            tb.innerHTML=">>";
-        }
-    }
-    </script>
-  </body>
-</html>
+    <div>
+    <label for="DATE(arrival_time)">Arriving</label>
+    <input type="date" id="DATE(arrival_time)" name="DATE(arrival_time)"><br>
+    </div>
+
+    
+    <div>
+    <input type="submit" value="Search">
+    </div>
+  </form> 
+  <table class="sortable">
+    <thead>
+        <tr>
+            <th>Airline</th>
+            <th>Flight Number</th>
+            <th>Departure</th>
+            <th>Arrival</th>
+            <th>Departure Time</th>
+            <th>Arrival Time</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in result %}
+        <tr>
+            <td>{{r['airline_name']}}</td>
+            <td>{{r['flight_num']}}</td>
+            <td>{{r['departure_airport']}}</td>
+            <td>{{r['arrival_airport']}}</td>
+            <td>{{r['departure_time']}}</td>
+            <td>{{r['arrival_time']}}</td>
+            <td>{{r['price']}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
