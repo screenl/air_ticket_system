@@ -22,6 +22,8 @@ class SQLConnection():
     def __init__(self):
         self.conn = pymysql.connect(host='localhost',
                                 user='root',
+                                port = 3307,
+                                password = '7Sanctuaries!',
                                 database='air_ticket',
                                 charset='utf8mb4',
                                 cursorclass=pymysql.cursors.DictCursor)
