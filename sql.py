@@ -1,4 +1,8 @@
 import pymysql
+import json
+import os
+
+config = json.load(open(f'{os.path.split(os.path.realpath(__file__))[0]}/config.json'))
 
 class Singleton:
     def __init__(self, cls):
@@ -20,9 +24,11 @@ class Singleton:
 @Singleton
 class SQLConnection():
     def __init__(self):
-        self.conn = pymysql.connect(host='localhost',
-                                user='root',
+        self.conn = pymysql.connect(host=config['host'],
+                                user=config['user'],
+                                password=config['password'],
                                 database='air_ticket',
                                 charset='utf8mb4',
                                 cursorclass=pymysql.cursors.DictCursor)
+        print('connected!')
         
