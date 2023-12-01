@@ -23,21 +23,31 @@ def login():
         password
         type - the type of login
     '''
-    msg = ''
     if request.method=='POST' and 'password' in request.form:
+        type = request.form["type"]
         password = request.form['password']
-        email = request.form['email']
+        if type != 'staff':
+            email = request.form['email']
+        else:
+            username = request.form['username']
         connection = pymysql.connect(host = host, port = 3307, user = user, password = dbpassword, database = 'air_ticket')
         cursor = connection.cursor()
-        cursor.execute('SELECT * FROM customer WHERE email = % s AND password = % s', (email, password, ))
+        #print('SELECT * FROM % s WHERE email = % s AND password = % s', (type, email, password, ))
+        if type == 'customer':
+            cursor.execute('SELECT * FROM customer WHERE email = % s AND password = % s', (email, password, ))
+        elif type == 'agent':
+            cursor.execute('SELECT * FROM agent WHERE agent_email = % s AND password = % s', (email, password, ))
+        elif type == 'staff':
+            cursor.execute('SELECT * FROM staff WHERE username = % s AND password = % s', (username, password, ))
         customer = cursor.fetchone()
+        print(request)
         if customer:
             session['loggedin'] = True
             session['username'] = customer[1]
             return redirect("/public/home")
         else:
-            msg = 'Invalid username or password!'
-    return render_template('login.html', msg = msg)
+            flash('Invalid username or password!')
+    return render_template('login.html')
 
 @bp.route('/logout/')
 def logout():
@@ -47,7 +57,7 @@ def logout():
     session.pop('loggedin', None)
     session.pop('id', None)
     session.pop('username', None)
-    return 'hello'
+    return redirect(url_for(login))
 
 @bp.route('/register/',methods=['GET','POST'])
 def register():
@@ -56,33 +66,69 @@ def register():
         a ton of user data (refer to sql)
         type - the type of user
     '''
-    msg = ''
-    if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'email' in request.form :
-        username = request.form['username']
-        password = request.form['password']
-        email = request.form['email']
+    if request.method == 'POST':
+        type = request.form["type"]
+        id = type
         connection = pymysql.connect(host = host, port = 3307, user = user, password = dbpassword, database = "air_ticket")
         cursor = connection.cursor()
-        cursor.execute('SELECT * FROM accounts WHERE username = % s', (username, ))
-        account = cursor.fetchone()
-        if account:
-            msg = 'Account already exists !'
-        elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
-            msg = 'Invalid email address !'
-        elif not re.match(r'[A-Za-z0-9]+', username):
-            msg = 'Username must contain only characters and numbers !'
-        elif not username or not password or not email:
-            msg = 'Please fill out the form !'
-        else:
-            cursor.execute('INSERT INTO accounts VALUES (NULL, % s, % s, % s)', (username, password, email, ))
-            connection.commit()
-            msg = 'You have successfully registered !'
-    elif request.method == 'POST':
-        msg = 'Please fill out the form !'
+        if type == 'customer':
+            name = request.form['name']
+            email = request.form['email']
+            password = request.form['password']
+            building_number = request.form['building_number']
+            street = request.form["street"]
+            city = request.form["city"]
+            state = request.form["state"]
+            phone_number = request.form["phone_number"]
+            passport_number = request.form["passport_number"]
+            passport_expiration = request.form["passport_expiration"]
+            passport_country = request.form["passport_country"]
+            date_of_birth = request.form["date_of_birth"]
+            cursor.execute('SELECT * FROM customer WHERE name = % s', (name, ))
+            account = cursor.fetchone()
+            if account:
+                flash('Account already exists !')
+            else:
+                cursor.execute(
+                    'INSERT INTO customer VALUES (% s, % s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
+                    (name, email, password, building_number, street, city, state, phone_number, passport_number, passport_expiration, passport_country, date_of_birth, ))
+                connection.commit()
+                flash('You have successfully registered !')
+                return redirect(url_for('account.login'))
+        elif type == 'agent':
+            email = request.form['email']
+            password = request.form['password']
+            cursor.execute('SELECT * FROM agent WHERE agent_email = % s', (email, ))
+            account = cursor.fetchone()
+            if account:
+                flash('Account already exists !')
+            else:
+                cursor.execute(
+                    'INSERT INTO agent(agent_email, password) VALUES (% s, % s)',
+                    (email, password, ))
+                connection.commit()
+                flash('You have successfully registered !')
+                return redirect(url_for('account.login'))
+        elif type == 'staff':
+            username = request.form['username']
+            airline_name = request.form['airline_name']
+            email = request.form['email']
+            password = request.form['password']
+            first_name = request.form['first_name']
+            last_name = request.form['last_name']
+            date_of_birth = request.form["date_of_birth"]
+            cursor.execute('SELECT * FROM airline_staff WHERE username = % s', (username, ))
+            account = cursor.fetchone()
+            if account:
+                flash('Account already exists !')
+            else:
+                cursor.execute(
+                    'INSERT INTO airline_staff VALUES (% s, % s, %s, %s, %s, %s)',
+                    (airline_name, username, password, first_name, last_name, date_of_birth,))
+                connection.commit()
+                flash('You have successfully registered !')
+                return redirect(url_for('account.login'))
 
-    if request.method=='POST':
-        print(request.form['type'])
-        return redirect("/account/login")
     return render_template('register.html')
 
 

@@ -13,6 +13,15 @@
     </div>
     <div id="forms">
         <div class="form" id="customer">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
             <form action="/account/register" method="post">
                 <p><label for="name">Name:</label> <input type="text" name="name" id="name"></p>
                 <p><label for="email">Email:</label><input type="email" name="email" id="email"></p>
@@ -31,6 +40,15 @@
             </form>
         </div>
         <div class="form" id="agent">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
             <form action="/account/register" method="post">
                 <p><label for="email">Email:</label> <input type="email" name="email" id="email"></p>
                 <p><label for="password">Password:</label> <input type="password" name="password" id="password"></p>
@@ -40,6 +58,15 @@
 
         </div>
         <div class="form" id="staff">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
             <form action="/account/register" method="post">
                 <p><label for="username">Username:</label> <input type="text" name="username" id="username"></p>
                 <p><label for="airline_name">Airline Name:</label> <input type="text" name="airline_name" id="airline_name"></p>
