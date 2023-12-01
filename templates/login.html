@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 
 <html>
@@ -5,7 +6,7 @@
     <link rel="stylesheet" href="/static/styles/signin.css">
 </head>
 <body>
-    <h1>Sign Up</h1>
+    <h1>Log In</h1>
     <div id="tabs">
         <div class="tab" data-target="customer">Customer</div>
         <div class="tab" data-target="agent">Agent</div>
@@ -13,29 +14,64 @@
     </div>
     <div id="forms">
         <div class="form" id="customer">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+            <div class="msg">{{msg}}</div>
             <form action="/account/login" method="post">
                 <p><label for="email">Email:</label><input type="email" name="email" id="email"></p>
                 <p><label for="password">Password:</label><input type="password" name="password" id="password"></p>
                 <input type="text" name="type" id="type" value="customer" style="display: none;">
                 <div id="sb"><input type="submit" id="customer_submit" value="Log In"></div>
             </form>
+            <br>
+            <div class = "bottom">Don't have an account?<a class ="bottom" href="{{url_for('account.register')}}">Sign Up here</a></div>
         </div>
         <div class="form" id="agent">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+            <div class="msg">{{msg}}</div>
             <form action="/account/login" method="post">
                 <p><label for="email">Email:</label> <input type="email" name="email" id="email"></p>
                 <p><label for="password">Password:</label> <input type="password" name="password" id="password"></p>
                 <input type="text" name="type" id="type" value="agent" style="display: none;">
                 <div id="sb"><input type="submit" id="agent_submit" value="Log In"></div>
             </form>
-
+            <br>
+            <div class = "bottom">Don't have an account?<a class ="bottom" href="{{url_for('account.register')}}">Sign Up here</a></div>
         </div>
         <div class="form" id="staff">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <ul class=flashes>
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+            <div class="msg">{{msg}}</div>
             <form action="/account/login" method="post">
                 <p><label for="username">Username:</label> <input type="text" name="username" id="username"></p>
                 <p><label for="password">Password:</label> <input type="password" name="password" id="password"></p>
                 <input type="text" name="type" id="type" value="staff" style="display: none;">
                 <div id="sb"><input type="submit" id="staff_submit" value="Log In"></div>
             </form>
+            <br>
+            <div class = "bottom">Don't have an account?<a class ="bottom" href="{{url_for('account.register')}}">Sign Up here</a></div>
         </div>
     </div>
     <script>
