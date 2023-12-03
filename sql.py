@@ -1,6 +1,6 @@
 import pymysql
-import json
 import os
+import json
 
 config = json.load(open(f'{os.path.split(os.path.realpath(__file__))[0]}/config.json'))
 
@@ -26,9 +26,9 @@ class SQLConnection():
     def __init__(self):
         self.conn = pymysql.connect(host=config['host'],
                                 user=config['user'],
-                                password=config['password'],
+                                port = int(config['port']),
+                                password = config['password'],
                                 database='air_ticket',
                                 charset='utf8mb4',
                                 cursorclass=pymysql.cursors.DictCursor)
-        print('connected!')
         

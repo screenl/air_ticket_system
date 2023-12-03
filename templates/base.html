@@ -24,7 +24,11 @@
       <div id="menu">
         {%if login%}
         <button class="collapsible" onclick="window.location.href='/account'">My Account</button>
-        <button class="collapsible" onclick="window.location.href='/account/logout'">Log Out</button>
+          {%if login['type']=='visitor'%}
+          <button class="collapsible" onclick="window.location.href='/account/logout'">Log In</button>
+          {%else%}
+            <button class="collapsible" onclick="window.location.href='/account/logout'">Log Out</button>
+          {%endif%}
         {%else%}
         <button class="collapsible" onclick="window.location.href='/account/login'">Log In</button>
         <button class="collapsible" onclick="window.location.href='/account/register'">Sign Up</button>

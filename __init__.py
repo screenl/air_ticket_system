@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask,redirect
+from flask import Flask,redirect,session
 from . import sql, staff
 
 

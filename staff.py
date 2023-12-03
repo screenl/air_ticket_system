@@ -13,6 +13,9 @@ def my_flights():
     result - list of flights
     login
     '''
+    if dict(session) == {}:
+        return redirect(url_for('account.login'))
+
     return render_template("my_flights_staff.html",result = [])
 
 @bp.route('/manage',methods=['GET','POST'])
@@ -22,7 +25,11 @@ def manage():
     airports - list of airports
     login
     '''
-    return render_template("manage_info.html")
+    if dict(session) == {}:
+        return redirect(url_for('account.login'))
+
+    return render_template("manage_info.html",
+                )
 
 @bp.route('/stats',methods=['GET'])
 def stats():
@@ -39,6 +46,9 @@ def stats():
     revenue_agent_y - the revenue via agents last year
     login
     '''
+    if dict(session) == {}:
+        return redirect(url_for('account.login'))
+
     return render_template("stats.html",
                            top_agent_sales = ['a','b','c','d','e'],
                            top_agent_commissions = ['a','b','c','d','e'],
@@ -56,6 +66,9 @@ def accounts():
     template data:
     login
     '''
+    if dict(session) == {}:
+        return redirect(url_for('account.login'))
+
     return render_template("manage_accounts.html")
 
 '''
@@ -73,6 +86,9 @@ def get_monthly_sales():
     return
     jsonified data(example below)
     '''
+    if dict(session) == {}:
+        return redirect(url_for('account.login'))
+
     return jsonify({
         'total_sales':21,
         'monthly_sales':[
@@ -92,6 +108,9 @@ def get_customer_flights():
     return
     jsonified data(example below)
     '''
+    if dict(session) == {}:
+        return redirect(url_for('account.login'))
+
     return jsonify({'flights':[{'number':5,'from':'i','to':'t'},{'number':5,'from':'i','to':'t'}]})
 
 
@@ -109,6 +128,9 @@ def change_status():
     flight_num
     status
     '''
+    if dict(session) == {}:
+        return redirect(url_for('account.login'))
+
     return ''
 
 @bp.route('/grant_permission',methods=['POST'])
@@ -120,6 +142,9 @@ def grant_permission():
 
     redirect to message page
     '''
+    if dict(session) == {}:
+        return redirect(url_for('account.login'))
+
     return ''
 
 @bp.route('/add_agent',methods=['POST'])
@@ -130,6 +155,9 @@ def add_agent():
 
     redirect to message page
     '''
+    if dict(session) == {}:
+        return redirect(url_for('account.login'))
+
     return ''
 
 @bp.route('/add_flight',methods=['POST'])
@@ -146,6 +174,9 @@ def add_flight():
     
     redirect to the message page
     '''
+    if dict(session) == {}:
+        return redirect(url_for('account.login'))
+
     return ''
 
 @bp.route('/add_airport',methods=['POST'])
@@ -157,6 +188,9 @@ def add_airport():
     
     redirect to the message page
     '''
+    if dict(session) == {}:
+        return redirect(url_for('account.login'))
+
     return ''
 
 @bp.route('/add_airplane',methods=['POST'])
@@ -168,5 +202,8 @@ def add_airplane():
 
     when completed, redirect to the message page
     '''
+    if dict(session) == {}:
+        return redirect(url_for('account.login'))
+
     return ''
 

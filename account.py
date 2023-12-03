@@ -1,15 +1,13 @@
 from . import sql 
 import pymysql
 import re
+import json
+import os
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
 
 bp = Blueprint('account', __name__, url_prefix='/account')
-
-host = 'localhost'
-user = 'root'
-dbpassword = '7Sanctuaries!'
 
 @bp.route('/')
 def account():
@@ -30,7 +28,8 @@ def login():
             email = request.form['email']
         else:
             username = request.form['username']
-        connection = pymysql.connect(host = host, port = 3307, user = user, password = dbpassword, database = 'air_ticket')
+        #connection = pymysql.connect(host = config['host'], port = int(config['port']), user = config['user'], password = config['password'], database = 'air_ticket')
+        connection = sql.SQLConnection.Instance().conn
         cursor = connection.cursor()
         #print('SELECT * FROM % s WHERE email = % s AND password = % s', (type, email, password, ))
         if type == 'customer':
@@ -38,12 +37,19 @@ def login():
         elif type == 'agent':
             cursor.execute('SELECT * FROM agent WHERE agent_email = % s AND password = % s', (email, password, ))
         elif type == 'staff':
-            cursor.execute('SELECT * FROM staff WHERE username = % s AND password = % s', (username, password, ))
-        customer = cursor.fetchone()
-        print(request)
-        if customer:
+            cursor.execute('SELECT * FROM airline_staff WHERE username = % s AND password = % s', (username, password, ))
+        account = cursor.fetchone()
+        if account:
+            print(account)
             session['loggedin'] = True
-            session['username'] = customer[1]
+            session['type'] = type
+            if type == 'customer':
+                session['username'] = account['name']
+                session['email'] = account['email']
+            elif type == 'agent':
+                session['username'] = f"Agent {account['booking_agent_id']}"
+            elif type == 'staff':
+                session['username'] = account['first_name']
             return redirect("/public/home")
         else:
             flash('Invalid username or password!')
@@ -54,10 +60,12 @@ def logout():
     '''
     remove user data from session
     '''
-    session.pop('loggedin', None)
-    session.pop('id', None)
-    session.pop('username', None)
-    return redirect(url_for(login))
+    print(session)
+    print(dict(session) == {})
+    session.clear()
+    print(session)
+    print(dict(session) == {})
+    return redirect(url_for('account.login'))
 
 @bp.route('/register/',methods=['GET','POST'])
 def register():
@@ -66,10 +74,11 @@ def register():
         a ton of user data (refer to sql)
         type - the type of user
     '''
+    flash('')
     if request.method == 'POST':
         type = request.form["type"]
-        id = type
-        connection = pymysql.connect(host = host, port = 3307, user = user, password = dbpassword, database = "air_ticket")
+        #connection = pymysql.connect(host = config['host'], port = int(config['port']), user = config['user'], password = config['password'], database = "air_ticket")
+        connection = sql.SQLConnection.Instance().conn
         cursor = connection.cursor()
         if type == 'customer':
             name = request.form['name']
@@ -90,7 +99,7 @@ def register():
                 flash('Account already exists !')
             else:
                 cursor.execute(
-                    'INSERT INTO customer VALUES (% s, % s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
+                    'INSERT INTO customer VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
                     (name, email, password, building_number, street, city, state, phone_number, passport_number, passport_expiration, passport_country, date_of_birth, ))
                 connection.commit()
                 flash('You have successfully registered !')
@@ -112,7 +121,6 @@ def register():
         elif type == 'staff':
             username = request.form['username']
             airline_name = request.form['airline_name']
-            email = request.form['email']
             password = request.form['password']
             first_name = request.form['first_name']
             last_name = request.form['last_name']
