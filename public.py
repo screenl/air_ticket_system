@@ -1,6 +1,6 @@
 from . import sql 
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, session, url_for, jsonify
+    Blueprint, flash, g, redirect, render_template, request, session, url_for, jsonify, Response
 )
 
 bp = Blueprint('public',__name__,url_prefix='/public')
@@ -69,10 +69,10 @@ def flight_status():
         login
     '''
     
-    print(request.args)
+    #print(request.args)
     params = request.args.to_dict()
-    print(params.values())
-    if '' not in params.values():
+    #print(params.values())
+    if params != {} and '' not in params.values():
         airline_name = params['airline_name']
         flight_num = params['flight_num']
         departure_time = params['DATE(departure_time)']
@@ -80,10 +80,10 @@ def flight_status():
         with sql.SQLConnection.Instance().conn.cursor() as cursor:
             #print("SELECT * FROM flight WHERE airline_name = %s AND flight_num = % s AND departure_time LIKE '% s%%' AND arrival_time LIKE '% s%%'", (airline_name, flight_num, departure_time, arrival_time,))
             #cursor.execute("SELECT * FROM flight WHERE airline_name = % s AND flight_num = % s AND departure_time LIKE % s%% AND arrival_time LIKE % s%%;", (airline_name, flight_num, departure_time, arrival_time,))
-            print(f"SELECT * FROM flight WHERE airline_name = {airline_name} AND flight_num = {flight_num} AND departure_time LIKE '{departure_time}%' AND arrival_time LIKE '{arrival_time}%';")
+            #print(f"SELECT * FROM flight WHERE airline_name = {airline_name} AND flight_num = {flight_num} AND departure_time LIKE '{departure_time}%' AND arrival_time LIKE '{arrival_time}%';")
             cursor.execute(f"SELECT * FROM flight WHERE airline_name = '{airline_name}' AND flight_num = {flight_num} AND departure_time LIKE '{departure_time}%' AND arrival_time LIKE '{arrival_time}%';")
             result = cursor.fetchone()
-            print(result)
+            #print(result)
     else:
         result = None
     with sql.SQLConnection.Instance().conn.cursor() as cursor:
@@ -104,7 +104,34 @@ def flight_status():
 
 @bp.route('/purchase_flight',methods=['POST'])
 def purchase_flight():
-    return jsonify({'message':'success'})
+    connection = sql.SQLConnection.Instance().conn
+    cursor = connection.cursor()
+    airline_name = request.form["airline_name"]
+    flight_num = request.form["flight_num"]
+    if session['type'] == 'agent':
+        buy_for = request.form['buy_for']
+        #print(buy_for)
+        cursor.execute('SELECT * FROM customer WHERE email = %s', (buy_for, ))
+        result = cursor.fetchone()
+        #print(result)
+        if not result:
+            return jsonify({'message':'plane is full'}),201
+        id = session['username'][6:]
+    elif session['type'] == 'customer':
+        buy_for = session['email']
+        id = 'NULL'
+    #if session['type'] == 'customer':
+    cursor.execute('SELECT COUNT(T.ticket_id) as CNT, P.seats FROM ticket as T, flight as F, airplane as P\
+        WHERE P.airline_name = F.airline_name AND P.id = F.plane AND T.airline_name = F.airline_name AND T.flight_num = F.flight_num AND F.airline_name = %s AND F.flight_num = %s', (airline_name, flight_num,))
+    result = cursor.fetchone()
+    print(result)
+    if result['CNT'] < result['seats']:
+        cursor.execute(
+        'INSERT INTO ticket (airline_name, customer_email, flight_num, booking_agent_id, ticket_id, purchased_date) VALUES (% s, %s, %s, %s, NULL, CURRENT_DATE())', (airline_name, buy_for, flight_num, id,))
+        connection.commit()
+        return jsonify({'message':'success'}),200
+    else:
+        return jsonify({'message':'plane is full'}),202
 
 @bp.route('redirect',methods=['GET'])
 def redir():

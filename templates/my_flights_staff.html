@@ -61,7 +61,7 @@
       if (xhr.readyState == 4 && xhr.status == 200) {
         alert("Change successfully made");
       } else {
-        alert(`Error: ${xhr.message}`);
+        alert(`Error: ${JSON.parse(xhr.responseText).message}`);
       }
       location.reload();
     };

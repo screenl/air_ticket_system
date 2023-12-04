@@ -23,17 +23,20 @@ def my_flights():
         return redirect(url_for('account.login'))
 
     prompt = request.args.to_dict()
-    prompt['status']='Upcoming'
-    req = 'SELECT * FROM flight WHERE ' + ' AND '.join((f'{i} = {repr(j)}' for i,j in prompt.items() if j!='' and 'DATE' not in i))
+    req = f"SELECT F.airline_name, F.flight_num, F.departure_airport, F.arrival_airport, F.departure_time, F.arrival_time, F.price\
+        FROM flight as F, ticket as T\
+        WHERE F.airline_name = T.airline_name AND F.flight_num = T.flight_num AND T.booking_agent_id = {session['username'][6:]}" #AND F.status = 'Upcoming'"
+    req += ''.join((f'AND F.{i} = {repr(j)}' for i,j in prompt.items() if j!='' and 'DATE' not in i))
     for time in ["departure_time", "arrival_time"]:
         if f'DATE({time})' in prompt and prompt[f'DATE({time})'] != '':
-            req += f'AND {time} LIKE "{prompt[f"DATE({time})"]}%"'
+            req += f'AND F.{time} LIKE "{prompt[f"DATE({time})"]}%"'
 
     with sql.SQLConnection.Instance().conn.cursor() as cursor:
         cursor.execute('SELECT * FROM airline')
         airlines = [x['name'] for x in cursor.fetchall()]
         cursor.execute(req)
         result = cursor.fetchall()
+        #print(result)
     return render_template('my_flights.html', 
         result=result,
         airlines=airlines,
@@ -74,9 +77,15 @@ def customers():
     if dict(session) == {}:
         return redirect(url_for('account.login'))
     
+    req = 'SELECT C.name, COUNT(T.ticket_id) as CNT FROM customer as C, ticket as T WHERE C.email = T.customer_email GROUP BY C.email ORDER BY COUNT(T.ticket_id) DESC LIMIT 5'
+    with sql.SQLConnection.Instance().conn.cursor() as cursor:
+        cursor.execute(req)
+        result = cursor.fetchall()
+        namest = [each['name'] for each in result]
+        tickets = [each['CNT'] for each in result]
     return render_template('top_customers.html',
-                            namest = ['Alice','Bob','Carol','David','Eve'],
-                            tickets = [5,4,3,2,0],
+                            namest = namest,
+                            tickets = tickets,
                             commission = [5,4,3,2,1],
                             namesc = ['Alice','Bob','Carol','David','Eve'],
                             login={

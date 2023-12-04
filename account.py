@@ -3,6 +3,7 @@ import pymysql
 import re
 import json
 import os
+import hashlib
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
@@ -23,7 +24,7 @@ def login():
     '''
     if request.method=='POST' and 'password' in request.form:
         type = request.form["type"]
-        password = request.form['password']
+        password = hashlib.md5(request.form['password'].encode()).hexdigest()
         if type != 'staff':
             email = request.form['email']
         else:
@@ -49,7 +50,7 @@ def login():
             elif type == 'agent':
                 session['username'] = f"Agent {account['booking_agent_id']}"
             elif type == 'staff':
-                session['username'] = account['first_name']
+                session['username'] = account['username']
             return redirect("/public/home")
         else:
             flash('Invalid username or password!')
@@ -83,7 +84,7 @@ def register():
         if type == 'customer':
             name = request.form['name']
             email = request.form['email']
-            password = request.form['password']
+            password = hashlib.md5(request.form['password'].encode()).hexdigest()
             building_number = request.form['building_number']
             street = request.form["street"]
             city = request.form["city"]
@@ -99,14 +100,14 @@ def register():
                 flash('Account already exists !')
             else:
                 cursor.execute(
-                    'INSERT INTO customer VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
+                    'INSERT INTO customer (name, email, password, building_number, street, city, state, phone_number, passport_number, passport_expiration, passport_country, date_of_birth) VALUES (% s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
                     (name, email, password, building_number, street, city, state, phone_number, passport_number, passport_expiration, passport_country, date_of_birth, ))
                 connection.commit()
                 flash('You have successfully registered !')
                 return redirect(url_for('account.login'))
         elif type == 'agent':
             email = request.form['email']
-            password = request.form['password']
+            password = hashlib.md5(request.form['password'].encode()).hexdigest()
             cursor.execute('SELECT * FROM agent WHERE agent_email = % s', (email, ))
             account = cursor.fetchone()
             if account:
@@ -121,7 +122,7 @@ def register():
         elif type == 'staff':
             username = request.form['username']
             airline_name = request.form['airline_name']
-            password = request.form['password']
+            password = hashlib.md5(request.form['password'].encode()).hexdigest()
             first_name = request.form['first_name']
             last_name = request.form['last_name']
             date_of_birth = request.form["date_of_birth"]
@@ -131,8 +132,8 @@ def register():
                 flash('Account already exists !')
             else:
                 cursor.execute(
-                    'INSERT INTO airline_staff VALUES (% s, % s, %s, %s, %s, %s)',
-                    (airline_name, username, password, first_name, last_name, date_of_birth,))
+                    'INSERT INTO airline_staff (username, airline_name, password, first_name, last_name, date_of_birth) VALUES (% s, % s, %s, %s, %s, %s)',
+                    (username, airline_name, password, first_name, last_name, date_of_birth,))
                 connection.commit()
                 flash('You have successfully registered !')
                 return redirect(url_for('account.login'))
