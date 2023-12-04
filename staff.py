@@ -2,7 +2,8 @@ from . import sql
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for, jsonify
 )
-
+from datetime import date
+from dateutil.relativedelta import relativedelta
 bp = Blueprint('staff',__name__,url_prefix='/staff')
 
 
@@ -62,17 +63,101 @@ def stats():
     '''
     if dict(session) == {}:
         return redirect(url_for('account.login'))
-
+    connection = sql.SQLConnection.Instance().conn
+    cursor = connection.cursor()
+    #____________top_agent____________
+    cursor.execute('''
+        SELECT booking_agent_id
+                FROM ticket JOIN airline_staff USING(airline_name) 
+                WHERE username = %s and booking_agent_id is not null
+                GROUP BY booking_agent_id 
+                ORDER BY count(ticket_id) DESC
+    ''',(session['username']))
+    top_agent_sales = [i['booking_agent_id'] for i in cursor.fetchall()]
+    
+    cursor.execute('''
+        SELECT booking_agent_id
+                FROM ticket JOIN airline_staff USING(airline_name) 
+                WHERE username = %s and booking_agent_id is not null
+                GROUP BY booking_agent_id 
+                ORDER BY sum(commission) DESC
+    ''',(session['username']))
+    top_agent_commission = [i['booking_agent_id'] for i in cursor.fetchall() ]
+    #____________most frequent____________
+    cursor.execute('''
+    SELECT customer_email 
+                FROM ticket JOIN airline_staff USING(airline_name) 
+                WHERE username = %s
+                GROUP BY customer_email 
+                ORDER BY count(ticket_id) DESC
+    ''',(session['username']))
+    most_frequent = cursor.fetchone()['customer_email']
+    #____________top_dest_month____________
+    cursor.execute(f'''SELECT city
+                FROM ticket JOIN flight using(flight_num,airline_name)
+                JOIN airport on flight.arrival_airport = airport.name
+                JOIN airline_staff USING(airline_name)
+                WHERE username = '{session['username']}'
+                AND DATE_FORMAT(purchased_date,'%Y-%m') >= DATE_FORMAT('{str(date.today()- relativedelta(months=3))}','%Y-%m')
+                AND DATE_FORMAT(purchased_date,'%Y-%m') <= DATE_FORMAT('{str(date.today())}','%Y-%m')
+                GROUP BY city
+                ORDER BY count(ticket_id) DESC LIMIT 3
+    ''')
+    top_dest_month = [i['city'] for i in cursor.fetchall()]
+    cursor.execute(f'''SELECT city
+                FROM ticket JOIN flight using(flight_num,airline_name)
+                JOIN airport on flight.arrival_airport = airport.name
+                JOIN airline_staff USING(airline_name)
+                WHERE username = '{session['username']}'
+                AND DATE_FORMAT(purchased_date,'%Y-%m') >= DATE_FORMAT('{str(date.today()- relativedelta(months=12))}','%Y-%m')
+                AND DATE_FORMAT(purchased_date,'%Y-%m') <= DATE_FORMAT('{str(date.today())}','%Y-%m')
+                GROUP BY city
+                ORDER BY count(ticket_id) DESC LIMIT 3
+    ''')
+    top_dest_year = [i['city'] for i in cursor.fetchall()]
+     #____________revenue____________
+    cursor.execute(f'''SELECT sum(price) as s
+                FROM ticket JOIN flight using(flight_num,airline_name)
+                JOIN airline_staff USING(airline_name)
+                WHERE username = '{session['username']}' and booking_agent_id IS NULL
+                AND DATE_FORMAT(purchased_date,'%Y-%m') >= DATE_FORMAT('{str(date.today()- relativedelta(months=1))}','%Y-%m')
+                AND DATE_FORMAT(purchased_date,'%Y-%m') <= DATE_FORMAT('{str(date.today())}','%Y-%m')
+    ''')
+    revenue_customer = cursor.fetchone()['s'] or 0
+    cursor.execute(f'''SELECT sum(price) as s
+                FROM ticket JOIN flight using(flight_num,airline_name)
+                JOIN airline_staff USING(airline_name)
+                WHERE username = '{session['username']}' and booking_agent_id IS NOT NULL
+                AND DATE_FORMAT(purchased_date,'%Y-%m') >= DATE_FORMAT('{str(date.today()- relativedelta(months=1))}','%Y-%m')
+                AND DATE_FORMAT(purchased_date,'%Y-%m') <= DATE_FORMAT('{str(date.today())}','%Y-%m')
+    ''')
+    revenue_agent = cursor.fetchone()['s'] or 0
+    cursor.execute(f'''SELECT sum(price) as s
+                FROM ticket JOIN flight using(flight_num,airline_name)
+                JOIN airline_staff USING(airline_name)
+                WHERE username = '{session['username']}' and booking_agent_id IS NULL
+                AND DATE_FORMAT(purchased_date,'%Y-%m') >= DATE_FORMAT('{str(date.today()- relativedelta(months=12))}','%Y-%m')
+                AND DATE_FORMAT(purchased_date,'%Y-%m') <= DATE_FORMAT('{str(date.today())}','%Y-%m')
+    ''')
+    revenue_customer_y = cursor.fetchone()['s'] or 0
+    cursor.execute(f'''SELECT sum(price) as s
+                FROM ticket JOIN flight using(flight_num,airline_name)
+                JOIN airline_staff USING(airline_name)
+                WHERE username = '{session['username']}' and booking_agent_id IS NOT NULL
+                AND DATE_FORMAT(purchased_date,'%Y-%m') >= DATE_FORMAT('{str(date.today()- relativedelta(months=12))}','%Y-%m')
+                AND DATE_FORMAT(purchased_date,'%Y-%m') <= DATE_FORMAT('{str(date.today())}','%Y-%m')
+    ''')
+    revenue_agent_y = cursor.fetchone()['s'] or 0
     return render_template("stats.html",
-                           top_agent_sales = ['a','b','c','d','e'],
-                           top_agent_commissions = ['a','b','c','d','e'],
-                           top_dest_month = ['a','b','c'],
-                           top_dest_year = ['a','b','c'],
-                           most_frequent = 'Otto',
-                           revenue_customer = 5,
-                           revenue_agent = 6,
-                           revenue_customer_y = 5,
-                           revenue_agent_y = 6,
+                           top_agent_sales = top_agent_sales,
+                           top_agent_commissions = top_agent_commission,
+                           top_dest_month = top_dest_month,
+                           top_dest_year = top_dest_year,
+                           most_frequent = most_frequent,
+                           revenue_customer = revenue_customer,
+                           revenue_agent = revenue_agent,
+                           revenue_customer_y = revenue_customer_y,
+                           revenue_agent_y = revenue_agent_y,
                            login={'username':session['username'],
                                 'type': session['type'],
                                 'profile':'https://www.gstatic.com/android/keyboard/emojikitchen/20220406/u1f349/u1f349_u1f605.png?fbx'})
@@ -107,16 +192,36 @@ def get_monthly_sales():
     jsonified data(example below)
     '''
     if dict(session) == {}:
-        return redirect(url_for('account.login'))
-
+        return jsonify({'message' : 'Only an Admin or an Operator can change status!'}),201
+    connection = sql.SQLConnection.Instance().conn
+    cursor = connection.cursor()
+    start = request.args.get('start') or str(date.today()- relativedelta(months=3))
+    end = request.args.get('end') or str(date.today())
+    cursor.execute(f'''SELECT DATE_FORMAT(purchased_date,'%Y-%m') as month, count(ticket_id) as sales
+                    FROM ticket join airline_staff using(airline_name)
+                    WHERE DATE_FORMAT(purchased_date,'%Y-%m') >= DATE_FORMAT('{start}','%Y-%m')
+                    AND DATE_FORMAT(purchased_date,'%Y-%m') <= DATE_FORMAT('{end}','%Y-%m')
+                    AND airline_staff.username = '{session['username']}'
+                    GROUP BY DATE_FORMAT(purchased_date,'%Y-%m')
+                ''', 
+                )
+    p = {k['month']:k['sales'] for k in cursor.fetchall()}
+    print(p)
+    monthly_sales = []
+    s = date.fromisoformat(start)
+    e = date.fromisoformat(end)
+    s.replace(day=1)
+    e.replace(day=1)
+    while s<e:
+        s+=relativedelta(months=1)
+        monthly_sales.append(
+            {'month':s.strftime("%Y-%m"), 'sales': p.get(s.strftime("%Y-%m"),0)}
+        )
+    print(monthly_sales)
+    total_sales = sum([i['sales'] for i in monthly_sales])
     return jsonify({
-        'total_sales':21,
-        'monthly_sales':[
-            {'month':'2022-3','sales':5},
-            {'month':'2022-4','sales':5},
-            {'month':'2022-5','sales':6},
-            {'month':'2022-6','sales':5},
-        ]
+        'total_sales': total_sales,
+        'monthly_sales': monthly_sales
     })
 
 @bp.route('/get_customer_flights',methods=['GET'])
@@ -130,8 +235,15 @@ def get_customer_flights():
     '''
     if dict(session) == {}:
         return redirect(url_for('account.login'))
-
-    return jsonify({'flights':[{'number':5,'from':'i','to':'t'},{'number':5,'from':'i','to':'t'}]})
+    connection = sql.SQLConnection.Instance().conn
+    cursor = connection.cursor()
+    cursor.execute('''SELECT DISTINCT flight_num, arrival_airport, departure_airport
+                   FROM ticket JOIN customer ON customer_email = email
+                   JOIN airline_staff USING(airline_name)
+                   JOIN flight USING(airline_name,flight_num)
+                   where customer.email = %s and airline_staff.username = %s''',
+                   (request.args['email'],session['username']))
+    return jsonify({'flights':cursor.fetchall()})
 
 
 '''
@@ -155,7 +267,7 @@ def change_status():
     cursor = connection.cursor()
     cursor.execute('SELECT * FROM permission WHERE username = %s AND (permission = "Admin" OR permission = "Operator")', (session['username'],))
     if not cursor.fetchone():
-        return  jsonify({'message' : 'Only an Admin or an Operator can change status!'}),201
+        return jsonify({'message' : 'Only an Admin or an Operator can change status!'}),201
     airline_name = request.form['airline_name']
     flight_num = int(request.form['flight_num'])
     status = request.form['status']

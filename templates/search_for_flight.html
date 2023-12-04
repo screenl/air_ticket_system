@@ -103,14 +103,19 @@
         const body = {
           airline_name: a_name,
           flight_num: f_num
+          {% if login['type'] == 'agent'%}
+          ,buy_for: prompt("Enter the email of the customer to purchase for")
+          {% endif %}
         }; 
         xhr.open("POST", "/public/purchase_flight");
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.onload = () => {
           if (xhr.readyState == 4 && xhr.status == 200) {
             alert("Purchase successfully made!");
+          } else if (xhr.readyState == 4 && xhr.status == 202){
+            alert("The capacity of the flight is full!");
           } else {
-            alert(`Error: ${JSON.parse(xhr.responseText).message}`);
+            alert(`Error: ${xhr.message}`);
           }
         };
         xhr.send(new URLSearchParams(body).toString());

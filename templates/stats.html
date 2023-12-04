@@ -127,7 +127,7 @@
           let k = "";
           ret.flights.forEach(i => {
             console.log(i);
-            k+=`<p><li>Flight Number ${i.number} from ${i.from} to ${i.to}</li></p>`;
+            k+=`<p><li>Flight Number ${i.flight_num} from ${i.departure_airport} to ${i.arrival_airport}</li></p>`;
           });
           customer_find_res.innerHTML=k;
         } else {
@@ -177,7 +177,7 @@
       xhr.send();
     }
 
-
+    get_sales();
 
     /* the fucking charts */
 

@@ -2,6 +2,7 @@ from . import sql
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
+from datetime import date,timedelta
 
 bp = Blueprint('agent',__name__,url_prefix='/agent')
 
@@ -23,7 +24,7 @@ def my_flights():
         return redirect(url_for('account.login'))
 
     prompt = request.args.to_dict()
-    req = f"SELECT F.airline_name, F.flight_num, F.departure_airport, F.arrival_airport, F.departure_time, F.arrival_time, F.price\
+    req = f"SELECT DISTINCT F.airline_name, F.flight_num, F.departure_airport, F.arrival_airport, F.departure_time, F.arrival_time, F.price\
         FROM flight as F, ticket as T\
         WHERE F.airline_name = T.airline_name AND F.flight_num = T.flight_num AND T.booking_agent_id = {session['username'][6:]}" #AND F.status = 'Upcoming'"
     req += ''.join((f'AND F.{i} = {repr(j)}' for i,j in prompt.items() if j!='' and 'DATE' not in i))
@@ -57,8 +58,22 @@ def commission():
     '''
     if dict(session) == {}:
         return redirect(url_for('account.login'))
-    
-    return render_template('commission.html',
+    connection = sql.SQLConnection.Instance().conn
+    cursor = connection.cursor()
+    cursor.execute(f'''
+                   select sum(commission) as s from ticket natural join agent where booking_agent_id = %s 
+                   and purchased_date >= '{request.args.get('start') or str(date.today()-timedelta(days=30))}'
+                   and purchased_date <= '{request.args.get('end') or str(date.today())}'
+                   ''',(session['username'][6:]))
+    commission = cursor.fetchone()['s']
+    cursor.execute(f'''
+                   select count(ticket_id) as s from ticket natural join agent where booking_agent_id = %s
+                   and purchased_date >= '{request.args.get('start') or str(date.today()-timedelta(days=30))}' 
+                   and purchased_date <= '{request.args.get('end') or str(date.today())}'
+                   ''',(session['username'][6:]))
+    tickets = cursor.fetchone()['s']
+    return render_template('commission.html', commission = commission,
+                           tickets = tickets, comm_per_ticket = (commission / tickets) if tickets else 'NONE',
         login={
            'username':session['username'],
            'type': session['type'],
@@ -77,17 +92,21 @@ def customers():
     if dict(session) == {}:
         return redirect(url_for('account.login'))
     
-    req = 'SELECT C.name, COUNT(T.ticket_id) as CNT FROM customer as C, ticket as T WHERE C.email = T.customer_email GROUP BY C.email ORDER BY COUNT(T.ticket_id) DESC LIMIT 5'
     with sql.SQLConnection.Instance().conn.cursor() as cursor:
-        cursor.execute(req)
+        cursor.execute('SELECT C.name, COUNT(T.ticket_id) as CNT FROM customer as C, ticket as T WHERE C.email = T.customer_email AND T.booking_agent_id = %s GROUP BY C.email ORDER BY COUNT(T.ticket_id) DESC LIMIT 5', (session['username'][6:]))
         result = cursor.fetchall()
         namest = [each['name'] for each in result]
         tickets = [each['CNT'] for each in result]
+
+        cursor.execute('SELECT C.name, SUM(T.commission) as SUM FROM customer as C, ticket as T WHERE C.email = T.customer_email AND T.booking_agent_id = %s GROUP BY C.email ORDER BY SUM(T.commission) DESC LIMIT 5', (session['username'][6:]))
+        result = cursor.fetchall()
+        namesc = [each['name'] for each in result]
+        commission = [each['SUM'] for each in result]
     return render_template('top_customers.html',
                             namest = namest,
                             tickets = tickets,
-                            commission = [5,4,3,2,1],
-                            namesc = ['Alice','Bob','Carol','David','Eve'],
+                            commission = commission,
+                            namesc = namesc,
                             login={
                                 'username':session['username'],
                                 'type': session['type'],

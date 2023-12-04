@@ -1,3 +1,5 @@
+from datetime import date
+from dateutil.relativedelta import relativedelta
 from . import sql 
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
@@ -56,12 +58,41 @@ def spending():
         months - a list of selected months
         login
     '''
-
     if dict(session) == {}:
         return redirect(url_for('account.login'))
+    connection = sql.SQLConnection.Instance().conn
+    cursor = connection.cursor()
+    start = request.args.get('start') or str(date.today()- relativedelta(months=6))
+    end = request.args.get('end') or str(date.today())
+    cursor.execute(f'''SELECT DATE_FORMAT(purchased_date,'%Y-%m') as month, sum(price) as spending
+                    FROM ticket JOIN flight USING(airline_name,flight_num)
+                    WHERE DATE_FORMAT(purchased_date,'%Y-%m') >= DATE_FORMAT('{start}','%Y-%m')
+                    AND DATE_FORMAT(purchased_date,'%Y-%m') <= DATE_FORMAT('{end}','%Y-%m')
+                    AND customer_email = '{session['email']}'
+                    GROUP BY DATE_FORMAT(purchased_date,'%Y-%m')
+                ''', 
+                )
+    print(f'''SELECT DATE_FORMAT(purchased_date,'%Y-%m') as month, sum(price) as spending
+                    FROM ticket JOIN flight USING(airline_name,flight_num)
+                    WHERE DATE_FORMAT(purchased_date,'%Y-%m') >= DATE_FORMAT('{start}','%Y-%m')
+                    AND DATE_FORMAT(purchased_date,'%Y-%m') <= DATE_FORMAT('{end}','%Y-%m')
+                    AND customer_email = '{session['email']}'
+                    GROUP BY DATE_FORMAT(purchased_date,'%Y-%m')
+                ''')
+    p = {k['month']:k['spending'] for k in cursor.fetchall()}
+    money = []
+    months = []
+    s = date.fromisoformat(start)
+    e = date.fromisoformat(end)
+    s.replace(day=1)
+    e.replace(day=1)
+    while s<e:
+        s+=relativedelta(months=1)
+        months.append(s.strftime("%Y-%m"))
+        money.append(p.get(s.strftime("%Y-%m"),0))
     return render_template('spending.html',
-                            money=[550, 490, 20 , 240, 400, 300],
-                            months=["2023-06", "2023-07", "2023-08", "2023-09", "2023-10","2023-11"],
+                            money=money,
+                            months=months,
                             login={
                                 'username':session['username'],
                                 'type': session['type'],

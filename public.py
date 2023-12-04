@@ -121,11 +121,20 @@ def purchase_flight():
         buy_for = session['email']
         id = 'NULL'
     #if session['type'] == 'customer':
-    cursor.execute('SELECT COUNT(T.ticket_id) as CNT, P.seats FROM ticket as T, flight as F, airplane as P\
-        WHERE P.airline_name = F.airline_name AND P.id = F.plane AND T.airline_name = F.airline_name AND T.flight_num = F.flight_num AND F.airline_name = %s AND F.flight_num = %s', (airline_name, flight_num,))
-    result = cursor.fetchone()
-    print(result)
-    if result['CNT'] < result['seats']:
+    cursor.execute('''SELECT COUNT(ticket_id) as c
+                   FROM ticket JOIN flight USING(airline_name,flight_num)
+                   WHERE airline_name = %s 
+                   AND flight_num = %s''', (airline_name, flight_num,))
+    cnt = cursor.fetchone()['c']
+    cursor.execute('''SELECT *
+                   FROM flight JOIN airplane ON flight.plane=airplane.id AND flight.airline_name=airplane.airline_name
+                   WHERE flight.airline_name = %s 
+                   AND flight.flight_num = %s''', (airline_name, flight_num,))
+    try:
+        seats = cursor.fetchone()['seats']
+    except:
+        seats = 999
+    if cnt < seats:
         cursor.execute(
         'INSERT INTO ticket (airline_name, customer_email, flight_num, booking_agent_id, ticket_id, purchased_date) VALUES (% s, %s, %s, %s, NULL, CURRENT_DATE())', (airline_name, buy_for, flight_num, id,))
         connection.commit()

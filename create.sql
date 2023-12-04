@@ -35,7 +35,7 @@ create table flight (
 create table agent (
     agent_email varchar(50) primary key,
     password varchar(50) not null, -- consider hashing for security
-    booking_agent_id varchar(50) unique not null
+    booking_agent_id int(50) AUTO_INCREMENT unique not null
 );
 
 create table works_for (
@@ -66,10 +66,11 @@ create table ticket (
     customer_email varchar(50),
     flight_num int,
     booking_agent_id varchar(50),
-    ticket_id varchar(50) primary key,
+    ticket_id int(50) auto_increment primary key,
     foreign key (airline_name) references airline(name),
     foreign key (customer_email) references customer(email),
     foreign key (airline_name,flight_num) references flight(airline_name,flight_num),
+    commission decimal(11,4) DEFAULT 0,
     purchased_date date not null
 );
 
